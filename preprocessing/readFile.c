@@ -101,6 +101,9 @@ void doWork(map_t map,const char *file){
     //读取每一行
     i=0;j=0;
     while(i<BUFLEN&&buf[i]!='\n'&&buf[i]!='\0'){
+      while(buf[i]==' '){
+        i++,j++; //跳过头部空格
+      }
       while(buf[i]!=' '&&buf[i]!='\n'&&i<BUFLEN&&buf[i]!='\0') i++;
       assert(i!=j);
       //i为空格位置
@@ -144,8 +147,8 @@ int main(char * argv,int argc)
     /*
      * 对每个文件操作
      */
-    doFilter(mymap,pCur->fileName);
-    //    doWork(mymap,pCur->fileName);
+    //doFilter(mymap,pCur->fileName);
+        doWork(mymap,pCur->fileName);
     pCur=pCur->next;
   }
   hashmap_iterate(mymap,freeVale,(void *)NULL);
