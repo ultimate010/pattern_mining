@@ -1,5 +1,5 @@
 /*
- * ¶ÁÈ¡ÎÄ¼ş£¬½«¿Õ¸ñ·ÖÀëµÄÊı¾İÌæ»»³ÉÊı×Ö
+ * è¯»å–æ–‡ä»¶ï¼Œå°†ç©ºæ ¼åˆ†ç¦»çš„æ•°æ®æ›¿æ¢æˆæ•°å­—
  * Zaks Wang
  * 2013-5-10
  */
@@ -30,45 +30,45 @@ int freeVale(any_t item ,any_t data){
   return MAP_OK;
 }
 /*
- * ¶ÁÈ¡ÎÄ¼ş£¬¹ıÂËÖØ¸´ĞĞ
- * ¸ñÊ½ÎªÈıĞĞÒ»×é
+ * è¯»å–æ–‡ä»¶ï¼Œè¿‡æ»¤é‡å¤è¡Œ
+ * æ ¼å¼ä¸ºä¸‰è¡Œä¸€ç»„
  */
 void doFilter(map_t map,const char *file){
   char temp[512]={0};
-  sprintf(temp,"%s%s",INFILEPATH,file); //ÊäÈë
+  sprintf(temp,"%s%s",INFILEPATH,file); //è¾“å…¥
   FILE *fileIn = fopen(temp,"r");
-  sprintf(temp,"%s%s",OUTFILEPATH,file); //Êä³ö
+  sprintf(temp,"%s%s",OUTFILEPATH,file); //è¾“å‡º
   FILE *fileOut = fopen(temp,"w");
   if(fileIn==NULL||temp==NULL){
     fprintf(stderr,"Open file error%s\n",file);
     return ;
   }
-  char buf[BUFLEN]={0}; //³õÊ¼»¯0
+  char buf[BUFLEN]={0}; //åˆå§‹åŒ–0
   char buf1[BUFLEN]={0};
   char buf2[BUFLEN]={0};
   int i=0;
   int error;
-  data_struct_t* value; //pairÊı¾İ
+  data_struct_t* value; //pairæ•°æ®
   while(fgets(buf,BUFLEN,fileIn)){
-    //¶ÁÈ¡Ã¿Ò»ĞĞ
+    //è¯»å–æ¯ä¸€è¡Œ
     fgets(buf1,BUFLEN,fileIn);
-    assert(buf1[0]!='\n'); //²»Ó¦¸Ã³öÏÖ¿ÕĞĞ
+    assert(buf1[0]!='\n'); //ä¸åº”è¯¥å‡ºç°ç©ºè¡Œ
     fgets(buf2,BUFLEN,fileIn);
-    assert(buf2[0]!='\n'); //Í¬ÉÏ
+    assert(buf2[0]!='\n'); //åŒä¸Š
     i=0;
     while(i<BUFLEN&&buf[i]!='\n'&&buf[i]!='\0'){
       i++;
     }
     if(i!=0){
-      //²»Îª¿ÕĞĞ
+      //ä¸ä¸ºç©ºè¡Œ
       value=(data_struct_t*)malloc(sizeof(data_struct_t));
       memset(value->key_string,0,KEY_MAX_LENGTH);
       strncpy(value->key_string,buf,i);
       value->number=1;
       error=hashmap_put(map,value->key_string,value);
       if(error==MAP_USED){
-        //ÒÑ¾­´æÔÚ
-        //²»Êä³ö
+        //å·²ç»å­˜åœ¨
+        //ä¸è¾“å‡º
       }else{
         assert(error==MAP_OK);
         fprintf(fileOut,"%s",buf);
@@ -81,39 +81,39 @@ void doFilter(map_t map,const char *file){
   fclose(fileIn),fclose(fileOut);
 }
 /*
- * ¶ÁÈ¡ÎÄ¼ş£¬Ìæ»»µ¥´ÊÎªÊı×Ö
+ * è¯»å–æ–‡ä»¶ï¼Œæ›¿æ¢å•è¯ä¸ºæ•°å­—
  */
 void doWork(map_t map,const char *file){
   char temp[512]={0};
-  sprintf(temp,"%s%s",INFILEPATH,file); //ÊäÈë
+  sprintf(temp,"%s%s",INFILEPATH,file); //è¾“å…¥
   FILE *fileIn = fopen(temp,"r");
-  sprintf(temp,"%s%s",OUTFILEPATH,file); //Êä³ö
+  sprintf(temp,"%s%s",OUTFILEPATH,file); //è¾“å‡º
   FILE *fileOut = fopen(temp,"w");
   if(fileIn==NULL||temp==NULL){
     fprintf(stderr,"Open file error%s\n",file);
     return ;
   }
-  char buf[BUFLEN]={0}; //³õÊ¼»¯0
+  char buf[BUFLEN]={0}; //åˆå§‹åŒ–0
   int i=0,j=0;
   int error;
-  data_struct_t* value; //pairÊı¾İ
+  data_struct_t* value; //pairæ•°æ®
   while(fgets(buf,BUFLEN,fileIn)){
-    //¶ÁÈ¡Ã¿Ò»ĞĞ
+    //è¯»å–æ¯ä¸€è¡Œ
     i=0;j=0;
     while(i<BUFLEN&&buf[i]!='\n'&&buf[i]!='\0'){
       while(buf[i]==' '){
-        i++,j++; //Ìø¹ıÍ·²¿¿Õ¸ñ
+        i++,j++; //è·³è¿‡å¤´éƒ¨ç©ºæ ¼
       }
       while(buf[i]!=' '&&buf[i]!='\n'&&i<BUFLEN&&buf[i]!='\0') i++;
       assert(i!=j);
-      //iÎª¿Õ¸ñÎ»ÖÃ
+      //iä¸ºç©ºæ ¼ä½ç½®
       value=(data_struct_t *)malloc(sizeof(data_struct_t));
       memset(value->key_string,0,KEY_MAX_LENGTH);
       strncpy(value->key_string,(buf+j),i-j);
       value->number = currentCount;
       error=hashmap_put(map,value->key_string,value);
       if(error==MAP_USED){
-        //ÒÑ¾­´æÔÚ
+        //å·²ç»å­˜åœ¨
         data_struct_t * temp=NULL;
         error=hashmap_get(map,value->key_string,(void **)(&temp));
         assert(error==MAP_OK);
@@ -122,9 +122,9 @@ void doWork(map_t map,const char *file){
       }else{
         assert(error==MAP_OK);
         fprintf(fileOut,"%d\t",value->number);
-        currentCount++; //ÏÂÒ»¸ö
+        currentCount++; //ä¸‹ä¸€ä¸ª
       }
-      j=++i;//Ìø¹ı¿Õ¸ñ
+      j=++i;//è·³è¿‡ç©ºæ ¼
     }
     memset(buf,0,BUFLEN);
     if(i!=0){
@@ -145,7 +145,7 @@ int main(char * argv,int argc)
   mymap = hashmap_new(2000000ul);
   while(pCur){
     /*
-     * ¶ÔÃ¿¸öÎÄ¼ş²Ù×÷
+     * å¯¹æ¯ä¸ªæ–‡ä»¶æ“ä½œ
      */
     //doFilter(mymap,pCur->fileName);
         doWork(mymap,pCur->fileName);
