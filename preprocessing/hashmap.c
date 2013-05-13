@@ -34,7 +34,7 @@ static const unsigned long prime_list[num_primes]=
 inline unsigned long next_prime(unsigned long n){
   const unsigned long * first = prime_list;
   const unsigned long * last = prime_list+(int)num_primes;
-  while(first != last&&*first < n){
+  while(first != last&&*first <= n){
     first++;
   }
   if(first==last){
