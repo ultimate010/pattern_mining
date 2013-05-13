@@ -10,7 +10,6 @@
 
 #include "hashmap.h"
 #include "getFileName.h"
-#define DEBUG 1
 #if defined(DEBUG)
 #include "leak_detector_c.h"
 #endif
@@ -137,18 +136,16 @@ int main(char * argv,int argc)
 #if defined(DEBUG)
   atexit(report_mem_leak);
 #endif
-
   _fileNameNode *pFiles = getFileNameByDir(INFILEPATH);
   _fileNameNode *pCur = pFiles;
   map_t mymap;
   mymap = hashmap_new(2000000ul);
-
   while(pCur){
     /*
      * 对每个文件操作
      */
     doFilter(mymap,pCur->fileName);
-//    doWork(mymap,pCur->fileName);
+    //    doWork(mymap,pCur->fileName);
     pCur=pCur->next;
   }
   hashmap_iterate(mymap,freeVale,(void *)NULL);

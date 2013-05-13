@@ -5,7 +5,6 @@
 #include    <stdio.h>
 #include    <stdlib.h>
 #include    <string.h>
-#define DEBUG 1
 #if defined(DEBUG)
 #include "leak_detector_c.h"
 #endif
