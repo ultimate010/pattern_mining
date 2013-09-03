@@ -14,9 +14,9 @@ class BideThread :
 private:
 	CountedPtr<DataShared> ptrData;
 	Mutex lock;
-	//¼ÇÂ¼µÚ¼¸¸öÏß³Ì
+	//è®°å½•ç¬¬å‡ ä¸ªçº¿ç¨‹
 	int ThreadId;
-	//ĞòÁĞ
+	//åºåˆ—
 	long m_seq[seqLength+1];
 public:
 	bool Bide(  vector<long>   * pProDatabase,const long *seq,const bool & backExtensionCheck,const double &lr,const long c1);

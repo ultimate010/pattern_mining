@@ -15,49 +15,52 @@
 using namespace std;
 class DataShared
 {
-public:
-	bool SetParameter();
-	bool ChuliShuju(const int & min_sup);
-	bool LoadData();
-	bool SetMinSup(const long &sup);
-	bool SetLikelyHood(const double &x);
-	long a2long(const string &s)const ;
-	void Freequent1Seq() ;
-	DataShared(void);
-	~DataShared(void);
-	//Ö¸ÏòÊı¾İ¿â
-	long ** m_pDatabase ;
-	//µ¥´ÊË÷Òı
-	vector<long> ** m_pWordProject;
-	//¾ä×ÓÖĞ³öÏÖ×Üµ¥´Ê¸öÊı
-	long m_nCountItem;
-	//²»Í¬µ¥´Ê¸öÊı
-	long m_nCountDifItem;
-	//ÖĞÎÄµ¥´ÊÊıÄ¿
-	long m_nCountZh;
-	//Ó¢ÎÄµ¥´ÊÊıÄ¿
-	long m_nCountEn;
-	//×îĞ¡Ö§³Ö¶È
-	long m_minSup;
-	//Êı¾İ¿âÖĞ¾ä×Ó×ÜĞĞÊı
-	long m_nCountRows;
-	//ÓÃÓÚÊä³ö
-	ofstream * m_pOut,*m_pOut1,*m_pOutParameter;
-	//µ¥´ÊË÷Òı£¬ÏÂ±ê±íÊ¾µ¥´ÊµÄÓ³Éä
-	string* m_Index;
-	//Ïà¹ØĞÔ
-	double m_like;
-	//¼ÇÂ¼Ã¿¸öµ¥´Ê³öÏÖµÄ×Ü´ÎÊı
-	long * m_pWordCout;
-	//¼ÇÂ¼ÖĞÎÄµÄÓ³Éä
-	long *m_pZh;
-	//¼ÇÂ¼Ó¢ÎÄµÄÓ³Éä
-	long *m_pEn;
-	//¼ÇÂ¼´¦ÀíµÄĞòÁĞµÄÎ»ÖÃ
-	vector<long>::iterator m_iter;
-	//¼ÇÂ¼ËùÓĞÒª´¦ÀíµÄÏîÄ¿
-	vector<long> * m_freq1Item;
-	//¼ÇÂ¼Êä³öµÄÖĞÎÄµ¥´ÊÊı
-	long m_outPutZh;
+  protected:
+    void loadConf(string path,map<string,string> & confMap);
+
+  public:
+    bool SetParameter();
+    bool ChuliShuju(const int & min_sup);
+    bool LoadData();
+    bool SetMinSup(const long &sup);
+    bool SetLikelyHood(const double &x);
+    long a2long(const string &s)const ;
+    void Freequent1Seq() ;
+    DataShared(void);
+    ~DataShared(void);
+    //æŒ‡å‘æ•°æ®åº“
+    long ** m_pDatabase ;
+    //å•è¯ç´¢å¼•
+    vector<long> ** m_pWordProject;
+    //å¥å­ä¸­å‡ºç°æ€»å•è¯ä¸ªæ•°
+    long m_nCountItem;
+    //ä¸åŒå•è¯ä¸ªæ•°
+    long m_nCountDifItem;
+    //ä¸­æ–‡å•è¯æ•°ç›®
+    long m_nCountZh;
+    //è‹±æ–‡å•è¯æ•°ç›®
+    long m_nCountEn;
+    //æœ€å°æ”¯æŒåº¦
+    long m_minSup;
+    //æ•°æ®åº“ä¸­å¥å­æ€»è¡Œæ•°
+    long m_nCountRows;
+    //ç”¨äºè¾“å‡º
+    ofstream * m_pOut,*m_pOut1,*m_pOutParameter;
+    //å•è¯ç´¢å¼•ï¼Œä¸‹æ ‡è¡¨ç¤ºå•è¯çš„æ˜ å°„
+    string* m_Index;
+    //ç›¸å…³æ€§
+    double m_like;
+    //è®°å½•æ¯ä¸ªå•è¯å‡ºç°çš„æ€»æ¬¡æ•°
+    long * m_pWordCout;
+    //è®°å½•ä¸­æ–‡çš„æ˜ å°„
+    long *m_pZh;
+    //è®°å½•è‹±æ–‡çš„æ˜ å°„
+    long *m_pEn;
+    //è®°å½•å¤„ç†çš„åºåˆ—çš„ä½ç½®
+    vector<long>::iterator m_iter;
+    //è®°å½•æ‰€æœ‰è¦å¤„ç†çš„é¡¹ç›®
+    vector<long> * m_freq1Item;
+    //è®°å½•è¾“å‡ºçš„ä¸­æ–‡å•è¯æ•°
+    long m_outPutZh;
 };
 

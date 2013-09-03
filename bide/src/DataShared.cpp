@@ -1,245 +1,258 @@
 #include "DataShared.h"
 
+void DataShared::loadConf(string path,map<string,string> & confMap){
+  cout <<"å‚æ•° :" <<endl;
+  ifstream file(path.c_str());
+  string str;
+  while(getline(file,str)){
+    confMap.insert(pair<string,string>(str.substr(0,str.find('=')),str.substr(str.find('=')+1)));
+  }
+  map<string,string>::iterator iter;
+  for(iter = confMap.begin();iter != confMap.end();iter++){
+    cout <<iter->first <<"\t" << iter->second <<endl;
+  }
+}
+
 DataShared::DataShared(void)
 {
-	SetParameter();	LoadData();
-	m_pOut = new ofstream(outFile);
-	m_pOut1 = new ofstream(outFile1);
-	m_pOutParameter = new ofstream(outFileParameter);
-	if (m_pOut==NULL||m_pOut1==NULL){
-		cout<<"Éú³ÉÎÄ¼ş´íÎó" << endl; return; }
-	Freequent1Seq();
-	*m_pOutParameter <<"lr: " <<m_like <<endl;
-	*m_pOutParameter <<"×îĞ¡Ö§³Ö¶È: " <<m_like <<endl;
-	*m_pOutParameter <<"×Üµ¥´ÊÊı: " <<m_nCountItem <<endl;
-	*m_pOutParameter <<"²»Í¬µ¥´ÊÊı: " <<m_nCountDifItem <<endl;
-	*m_pOutParameter <<"Ó¢ÎÄµ¥´ÊÊı: " <<m_nCountEn <<endl;
-	*m_pOutParameter <<"ÖĞÎÄµ¥´ÊÊı: " <<m_nCountZh <<endl;
-	*m_pOutParameter <<"×ÜĞĞÊı: " <<m_nCountRows <<endl;
-	m_iter = m_freq1Item->begin();
-	m_outPutZh = 0;
+  SetParameter();	LoadData();
+  m_pOut = new ofstream(outFile);
+  m_pOut1 = new ofstream(outFile1);
+  m_pOutParameter = new ofstream(outFileParameter);
+  if (m_pOut==NULL||m_pOut1==NULL){
+    cout<<"ç”Ÿæˆæ–‡ä»¶é”™è¯¯" << endl; return; }
+  Freequent1Seq();
+  *m_pOutParameter <<"lr: " <<m_like <<endl;
+  *m_pOutParameter <<"æœ€å°æ”¯æŒåº¦: " <<m_like <<endl;
+  *m_pOutParameter <<"æ€»å•è¯æ•°: " <<m_nCountItem <<endl;
+  *m_pOutParameter <<"ä¸åŒå•è¯æ•°: " <<m_nCountDifItem <<endl;
+  *m_pOutParameter <<"è‹±æ–‡å•è¯æ•°: " <<m_nCountEn <<endl;
+  *m_pOutParameter <<"ä¸­æ–‡å•è¯æ•°: " <<m_nCountZh <<endl;
+  *m_pOutParameter <<"æ€»è¡Œæ•°: " <<m_nCountRows <<endl;
+  m_iter = m_freq1Item->begin();
+  m_outPutZh = 0;
 }
 
 //////////////////////////////////////////////////////////////////////////
-// ·µ»ØÆµ·±1ĞòÁĞ
+// è¿”å›é¢‘ç¹1åºåˆ—
 //////////////////////////////////////////////////////////////////////////
 void DataShared::Freequent1Seq()  {
-	m_freq1Item = new vector<long>;
-	for(long i = 0;i<m_nCountEn;i++){
-		if((m_pWordProject[m_pEn[i]])->size() >= m_minSup){
-			m_freq1Item->push_back(m_pEn[i]);
-		}
-	}
+  m_freq1Item = new vector<long>;
+  for(long i = 0;i<m_nCountEn;i++){
+    if((m_pWordProject[m_pEn[i]])->size() >= m_minSup){
+      m_freq1Item->push_back(m_pEn[i]);
+    }
+  }
 }
 
 
 
 DataShared::~DataShared(void)
 {
-	//ÊÍ·Å×ÊÔ´
-	delete m_pDatabase[];
-	delete m_pEn;
-	delete m_pZh;
-	delete m_pWordCout;
-	delete m_pWordProject;
-	delete m_Index;
+  //é‡Šæ”¾èµ„æº
+  delete m_pDatabase[];
+  delete m_pEn;
+  delete m_pZh;
+  delete m_pWordCout;
+  delete m_pWordProject;
+  delete m_Index;
 }
 
 bool DataShared::SetParameter()
 {
-	cout <<"ÇëÊäÈëÖ§³Ö¶È£º" <<endl;
-	long sup;
-	cin >>sup;
-	SetMinSup(sup);
-	double lr;
-	cout <<"ÇëÊäÈëlrÖµ: " <<endl; cin>> lr;
-	SetLikelyHood(lr);
-	return true;
+  cout <<"è¯·è¾“å…¥æ”¯æŒåº¦ï¼š" <<endl;
+  long sup;
+  cin >>sup;
+  SetMinSup(sup);
+  double lr;
+  cout <<"è¯·è¾“å…¥lrå€¼: " <<endl; cin>> lr;
+  SetLikelyHood(lr);
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////////
-// °ÑÊäÈëÊı¾İ×öÓ³Éä£¬Êä³öÁÙÊ±ÎÄ¼ş
-// ¸ñÊ½Îª£º
-// row1£ºÃ¿¸öµ¥´Ê¶ÔÓ¦µÄÓ³ÉäÊı×Ö
-// row2£ºÉÏÒ»ĞĞµÄ×Üµ¥´ÊÊıÄ¿
+// æŠŠè¾“å…¥æ•°æ®åšæ˜ å°„ï¼Œè¾“å‡ºä¸´æ—¶æ–‡ä»¶
+// æ ¼å¼ä¸ºï¼š
+// row1ï¼šæ¯ä¸ªå•è¯å¯¹åº”çš„æ˜ å°„æ•°å­—
+// row2ï¼šä¸Šä¸€è¡Œçš„æ€»å•è¯æ•°ç›®
 //////////////////////////////////////////////////////////////////////////
 bool DataShared::ChuliShuju(const int & min_sup){
-	long nCountItem = 0;	//¼ÆËãµ¥´ÊÊıÄ¿
-	long nCountRow = 0; //¼ÆËãĞĞÊı
-	int nCountWordIn1Sentence = 0; //Ã¿ĞĞÖĞµÄµ¥´ÊÊıÄ¿
-	m_nCountEn = 0;
-	m_nCountZh = 0;
-	ifstream f_in(rawFile);
-	ofstream f_out(tempFile);
-	if(f_in==NULL||f_out==NULL){
-		cout <<"ÎÄ¼şÎ´ÕÒµ½!" <<endl; return false;
-	}
-	multimap<string,long> * map_All_Word = new multimap<string,long>; //´æ´¢ËùÓĞµÄµ¥´Ê
-	map<string,long>* m_map =new map<string,long>; string str_Input; //´æ´¢²»Í¬µÄµ¥´Ê
-	while(getline(f_in,str_Input)){ //¶Á³öÃ¿Ò»ĞĞ
-		if (str_Input.length()==0)	continue;//Èç¹û¿ÕĞĞ£¬Ìø¹ı
-		nCountRow++; //×ÜĞĞÊı+1
+  long nCountItem = 0;	//è®¡ç®—å•è¯æ•°ç›®
+  long nCountRow = 0; //è®¡ç®—è¡Œæ•°
+  int nCountWordIn1Sentence = 0; //æ¯è¡Œä¸­çš„å•è¯æ•°ç›®
+  m_nCountEn = 0;
+  m_nCountZh = 0;
+  ifstream f_in(rawFile);
+  ofstream f_out(tempFile);
+  if(f_in==NULL||f_out==NULL){
+    cout <<"æ–‡ä»¶æœªæ‰¾åˆ°!" <<endl; return false;
+  }
+  multimap<string,long> * map_All_Word = new multimap<string,long>; //å­˜å‚¨æ‰€æœ‰çš„å•è¯
+  map<string,long>* m_map =new map<string,long>; string str_Input; //å­˜å‚¨ä¸åŒçš„å•è¯
+  while(getline(f_in,str_Input)){ //è¯»å‡ºæ¯ä¸€è¡Œ
+    if (str_Input.length()==0)	continue;//å¦‚æœç©ºè¡Œï¼Œè·³è¿‡
+    nCountRow++; //æ€»è¡Œæ•°+1
 #if _MyDebug
-		cout <<"¶ÁÈ¡Ô­Ê¼Êı¾İµÚ" <<nCountRow <<"ĞĞ!" <<endl;
+    cout <<"è¯»å–åŸå§‹æ•°æ®ç¬¬" <<nCountRow <<"è¡Œ!" <<endl;
 #endif
-		nCountWordIn1Sentence = 0; //Ã¿ĞĞÖĞµ¥´ÊÊıÄ¿³õÊ¼»¯Îª0
-		int nSpacePos = 0; //Î»ÖÃ
-		nSpacePos = str_Input.find(" ");
-		while(nSpacePos>=0){
-			while (nSpacePos == 0 ){
-				str_Input = str_Input.erase(0,1);nSpacePos=str_Input.find(" ");//É¾µô¾äÊ×µÄÎŞÓÃ×Ö·û
-			}
-			string subString = str_Input.substr(0,nSpacePos); //È¡³öËùÓĞµÄµ¥´Ê
-			str_Input.erase(0,nSpacePos+1);
-			if (subString==" "||subString=="")
-			{
-			nSpacePos = str_Input.find(' '); continue ; //¿Õ¸ñÌø¹ı
-			}
-			char c = subString.data()[0];
-			if((c>='a'&&c<='z')||(c>='A'&&c<='Z')){
-				//´¦ÀíµÄÊÇÓ¢ÎÄ
-				if(m_map->find(subString)==m_map->end())
-					m_nCountEn++;
-			}else{
-				//ÆäËûÀàĞÍµÄ¶¼¼ÇÎªÓ¢ÎÄ
-				if(m_map->find(subString)==m_map->end())
-				m_nCountZh++;
-			}
-			nCountWordIn1Sentence++; //´¦ÀíÒ»¸öµ¥´Ê£¬µ¥´ÊÊı+1
-			multimap<string,long>::iterator myIter = map_All_Word->find(subString);  //²éÕÒÊÇ·ñÒÑ¾­¼ÇÂ¼¹ıÕâ¸öµ¥´Ê
-			if (myIter != map_All_Word->end())
-			{ //ÕÒµ½´æÔÚµÄ
-				f_out <<myIter->second <<" "; //Êä³öÓ³ÉäµÄÊı×ÖÊı¾İ
-				map_All_Word->insert(make_pair(subString,myIter->second));  //°Ñµ±Ç°µ¥´ÊÓ³ÉäÔÙ´Î²åÈëmapÖĞ
+    nCountWordIn1Sentence = 0; //æ¯è¡Œä¸­å•è¯æ•°ç›®åˆå§‹åŒ–ä¸º0
+    int nSpacePos = 0; //ä½ç½®
+    nSpacePos = str_Input.find(" ");
+    while(nSpacePos>=0){
+      while (nSpacePos == 0 ){
+        str_Input = str_Input.erase(0,1);nSpacePos=str_Input.find(" ");//åˆ æ‰å¥é¦–çš„æ— ç”¨å­—ç¬¦
+      }
+      string subString = str_Input.substr(0,nSpacePos); //å–å‡ºæ‰€æœ‰çš„å•è¯
+      str_Input.erase(0,nSpacePos+1);
+      if (subString==" "||subString=="")
+      {
+        nSpacePos = str_Input.find(' '); continue ; //ç©ºæ ¼è·³è¿‡
+      }
+      char c = subString.data()[0];
+      if((c>='a'&&c<='z')||(c>='A'&&c<='Z')){
+        //å¤„ç†çš„æ˜¯è‹±æ–‡
+        if(m_map->find(subString)==m_map->end())
+        m_nCountEn++;
+      }else{
+        //å…¶ä»–ç±»å‹çš„éƒ½è®°ä¸ºè‹±æ–‡
+        if(m_map->find(subString)==m_map->end())
+        m_nCountZh++;
+      }
+      nCountWordIn1Sentence++; //å¤„ç†ä¸€ä¸ªå•è¯ï¼Œå•è¯æ•°+1
+      multimap<string,long>::iterator myIter = map_All_Word->find(subString);  //æŸ¥æ‰¾æ˜¯å¦å·²ç»è®°å½•è¿‡è¿™ä¸ªå•è¯
+      if (myIter != map_All_Word->end())
+      { //æ‰¾åˆ°å­˜åœ¨çš„
+        f_out <<myIter->second <<" "; //è¾“å‡ºæ˜ å°„çš„æ•°å­—æ•°æ®
+        map_All_Word->insert(make_pair(subString,myIter->second));  //æŠŠå½“å‰å•è¯æ˜ å°„å†æ¬¡æ’å…¥mapä¸­
 #if _MYDEBUG
-				cout <<myIter->second <<" ";
+        cout <<myIter->second <<" ";
 #endif
-			}else{ //Ã»ÓĞ¼ÇÂ¼Õâ¸öµ¥´Ê£¬²åÈëÕâ¸öĞÂµÄÓ³Éä
-				f_out << nCountItem <<" ";
+      }else{ //æ²¡æœ‰è®°å½•è¿™ä¸ªå•è¯ï¼Œæ’å…¥è¿™ä¸ªæ–°çš„æ˜ å°„
+        f_out << nCountItem <<" ";
 #if _MYDEBUG
-				cout <<nCountItem <<"	";
+        cout <<nCountItem <<"	";
 #endif
-				map_All_Word->insert(make_pair(subString,nCountItem));
-				m_map->insert(make_pair(subString,nCountItem)); nCountItem++;   	//×Üµ¥´Ê¼ÆÊı+1
-			}
-			nSpacePos = str_Input.find(' ');
-		}
-		f_out <<endl; f_out << nCountWordIn1Sentence << endl; //»»ĞĞ
-	}
-	/*
-	f_out <<nCountRow <<" " << map_All_Word.size() <<" " << min_sup <<" " <<m_map->size() <<endl; //Êä³öµÚÒ»ĞĞ
-	*/
-	//¸³Öµ
-	m_minSup = min_sup; m_nCountRows = nCountRow; m_nCountItem = map_All_Word->size();
-	m_nCountDifItem = m_map->size(); m_Index = new string[m_nCountDifItem];
-	for (map<string,long>::iterator iter = m_map->begin();
-		iter!=m_map->end();iter++)
-		m_Index[iter->second]=iter->first; //³õÊ¼»¯
-	delete m_map;
-	delete map_All_Word;
-	return true;
+        map_All_Word->insert(make_pair(subString,nCountItem));
+        m_map->insert(make_pair(subString,nCountItem)); nCountItem++;   	//æ€»å•è¯è®¡æ•°+1
+      }
+      nSpacePos = str_Input.find(' ');
+    }
+    f_out <<endl; f_out << nCountWordIn1Sentence << endl; //æ¢è¡Œ
+  }
+  /*
+     f_out <<nCountRow <<" " << map_All_Word.size() <<" " << min_sup <<" " <<m_map->size() <<endl; //è¾“å‡ºç¬¬ä¸€è¡Œ
+     */
+  //èµ‹å€¼
+  m_minSup = min_sup; m_nCountRows = nCountRow; m_nCountItem = map_All_Word->size();
+  m_nCountDifItem = m_map->size(); m_Index = new string[m_nCountDifItem];
+  for (map<string,long>::iterator iter = m_map->begin();
+        iter!=m_map->end();iter++)
+  m_Index[iter->second]=iter->first; //åˆå§‹åŒ–
+  delete m_map;
+  delete map_All_Word;
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////////
-// ¶ÁÈ¡Êı¾İµ½ÄÚ´æÖĞ£¬²¢ÇÒ³õÊ¼»°pDatabaseÖ¸ÕëÖ¸ÏòÊı¾İ¿â
-// Êı¾İ¿âµÄ¸ñÊ½Îª£º
-// µÚiĞĞÎª£º×ª»»ºóµÄ¾ä×Ó
-// µÚi+1ĞĞÎª£ºÉÏÒ»ĞĞ¾ä×ÓÒ»¹²ÓĞ¶àÉÙ¸öµ¥´Ê
-// pDatabaseÖĞÊı¾İ´æ´¢¸ñÊ½Îª£º
-// Ã¿ĞĞ£º±¾ĞĞµÄµ¥´ÊÊı ÒÀ´ÎÃ¿¸öµ¥´Ê
-// ³õÊ¼m_pWordProjectË÷Òı£¬¸ñÊ½Îª£º
-// µÚiĞĞµÄÊı¾İ´æ´¢µ¥´ÊiËùÓĞ³öÏÖµÄĞĞÊı
+// è¯»å–æ•°æ®åˆ°å†…å­˜ä¸­ï¼Œå¹¶ä¸”åˆå§‹è¯pDatabaseæŒ‡é’ˆæŒ‡å‘æ•°æ®åº“
+// æ•°æ®åº“çš„æ ¼å¼ä¸ºï¼š
+// ç¬¬iè¡Œä¸ºï¼šè½¬æ¢åçš„å¥å­
+// ç¬¬i+1è¡Œä¸ºï¼šä¸Šä¸€è¡Œå¥å­ä¸€å…±æœ‰å¤šå°‘ä¸ªå•è¯
+// pDatabaseä¸­æ•°æ®å­˜å‚¨æ ¼å¼ä¸ºï¼š
+// æ¯è¡Œï¼šæœ¬è¡Œçš„å•è¯æ•° ä¾æ¬¡æ¯ä¸ªå•è¯
+// åˆå§‹m_pWordProjectç´¢å¼•ï¼Œæ ¼å¼ä¸ºï¼š
+// ç¬¬iè¡Œçš„æ•°æ®å­˜å‚¨å•è¯iæ‰€æœ‰å‡ºç°çš„è¡Œæ•°
 //////////////////////////////////////////////////////////////////////////
 bool DataShared::LoadData()
 {
-	if(ChuliShuju(m_minSup)==false){
-		//¶ÁÈ¡Êı¾İ
-		return false;
-	}
-	ifstream in(tempFile);
-	if (in==NULL)
-	{
-		cout <<"ÎÄ¼şÎ´ÕÒµ½!" <<endl;
-		return false;
-	}
-	string str_firstInput;
-	string str_secondInput;
-	int pos;
-	//³õÊ¼»¯µ¥´ÊË÷Òı
-	m_pDatabase = new long *[m_nCountRows];
-	m_pWordCout = new long[m_nCountDifItem];
-	m_pWordProject = new vector<long> *[m_nCountDifItem];
-	m_pEn = new long[m_nCountEn];
-	m_pZh = new long[m_nCountZh];
-	map<string,bool> setEn,setZh;
-	long countEn = 0;
-	long countZh = 0;
-	for (long myi = 0 ; myi<m_nCountDifItem;myi++){
-		m_pWordProject[myi] = new vector<long>;
-		m_pWordCout[myi] = 0;
-	}
-	//½øÈëÊı¾İ¶ÁÈ¡
-	long nCountWord = 0;  //´æ´¢Ã¿Ò»¾äÖĞµÄµ¥´ÊÊıÄ¿
-	long nRow = 0; //´æ´¢µ±Ç°µÚ¼¸ĞĞ
-	while(getline(in,str_firstInput)){ //str_firstInputÖĞ´æ·ÅÒ»¾ä  str_secondInputÖĞ´æ·ÅÕâ¾ä×Üµ¥´ÊÊıÄ¿
-		getline(in,str_secondInput); nCountWord = a2long(str_secondInput.data());
-		m_pDatabase[nRow] = new long[nCountWord+1]; //³õÊ¼»¯
-		long * pWriter = m_pDatabase[nRow]; //Ö¸ÏòpDatabaseÖĞµÄµÚnĞĞÊı¾İ
-		*pWriter = nCountWord; //Ğ´Èë±¾ĞĞ×Üµ¥´Ê
-		pWriter++;
-		while(1){
-			pos = str_firstInput.find(' ');
-			if(pos == -1) break; //µ±Ç°ĞĞÒÑ¾­´¦ÀíÍêÁË
-			str_secondInput = str_firstInput.substr(0,pos);  str_firstInput.erase(0,pos+1);
-			*pWriter = a2long(str_secondInput.data());
-			m_pWordCout[*pWriter]++;
-			//ÅĞ¶Ïµ±Ç°Ó³ÉäµÄÖĞÓ¢£¬¼ÓÈëÏàÓ¦µÄÓ³ÉäÊı×é
-			string temp = m_Index[*pWriter];
-			char c = temp.data()[0];
-			if((c<='z'&&c>='a')||(c<='Z'&&c>='A')){
-				//Ó¢ÎÄ
-				//ÏÈÅĞ¶ÏsetÖĞÊÇ·ñ¼ÇÂ¼£¬Ò²¾ÍÊÇÊÇ·ñµÚÒ»´Î³öÏÖ
-				if(setEn.find(temp)==setEn.end()){
-					m_pEn[countEn++]= *pWriter;
-					setEn.insert(make_pair(temp,false));
-				}
-			}else{
+  if(ChuliShuju(m_minSup)==false){
+    //è¯»å–æ•°æ®
+    return false;
+  }
+  ifstream in(tempFile);
+  if (in==NULL)
+  {
+    cout <<"æ–‡ä»¶æœªæ‰¾åˆ°!" <<endl;
+    return false;
+  }
+  string str_firstInput;
+  string str_secondInput;
+  int pos;
+  //åˆå§‹åŒ–å•è¯ç´¢å¼•
+  m_pDatabase = new long *[m_nCountRows];
+  m_pWordCout = new long[m_nCountDifItem];
+  m_pWordProject = new vector<long> *[m_nCountDifItem];
+  m_pEn = new long[m_nCountEn];
+  m_pZh = new long[m_nCountZh];
+  map<string,bool> setEn,setZh;
+  long countEn = 0;
+  long countZh = 0;
+  for (long myi = 0 ; myi<m_nCountDifItem;myi++){
+    m_pWordProject[myi] = new vector<long>;
+    m_pWordCout[myi] = 0;
+  }
+  //è¿›å…¥æ•°æ®è¯»å–
+  long nCountWord = 0;  //å­˜å‚¨æ¯ä¸€å¥ä¸­çš„å•è¯æ•°ç›®
+  long nRow = 0; //å­˜å‚¨å½“å‰ç¬¬å‡ è¡Œ
+  while(getline(in,str_firstInput)){ //str_firstInputä¸­å­˜æ”¾ä¸€å¥  str_secondInputä¸­å­˜æ”¾è¿™å¥æ€»å•è¯æ•°ç›®
+    getline(in,str_secondInput); nCountWord = a2long(str_secondInput.data());
+    m_pDatabase[nRow] = new long[nCountWord+1]; //åˆå§‹åŒ–
+    long * pWriter = m_pDatabase[nRow]; //æŒ‡å‘pDatabaseä¸­çš„ç¬¬nè¡Œæ•°æ®
+    *pWriter = nCountWord; //å†™å…¥æœ¬è¡Œæ€»å•è¯
+    pWriter++;
+    while(1){
+      pos = str_firstInput.find(' ');
+      if(pos == -1) break; //å½“å‰è¡Œå·²ç»å¤„ç†å®Œäº†
+      str_secondInput = str_firstInput.substr(0,pos);  str_firstInput.erase(0,pos+1);
+      *pWriter = a2long(str_secondInput.data());
+      m_pWordCout[*pWriter]++;
+      //åˆ¤æ–­å½“å‰æ˜ å°„çš„ä¸­è‹±ï¼ŒåŠ å…¥ç›¸åº”çš„æ˜ å°„æ•°ç»„
+      string temp = m_Index[*pWriter];
+      char c = temp.data()[0];
+      if((c<='z'&&c>='a')||(c<='Z'&&c>='A')){
+        //è‹±æ–‡
+        //å…ˆåˆ¤æ–­setä¸­æ˜¯å¦è®°å½•ï¼Œä¹Ÿå°±æ˜¯æ˜¯å¦ç¬¬ä¸€æ¬¡å‡ºç°
+        if(setEn.find(temp)==setEn.end()){
+          m_pEn[countEn++]= *pWriter;
+          setEn.insert(make_pair(temp,false));
+        }
+      }else{
 
-				if(setZh.find(temp)==setZh.end()){
-					m_pZh[countZh++]= *pWriter;
-					setZh.insert(make_pair(temp,false));
-				}
-			}
-			//Ğ´ÈëË÷Òı,×¢Òâ£¬Ò»¾ä»°ÖĞ³öÏÖÁ½¸öÍ¬Í¬ÑùµÄµ¥´Ê£¬Ö»Ğ´ÈëÒ»´ÎĞĞÊı
-			vector<long> *pTemp = m_pWordProject[*pWriter];
-			if (pTemp->size()==0){ //Èç¹ûµÚÒ»´Î²åÈë£¬ÄÇÃ´Ö±½Ó²åÈë
-				pTemp->push_back(nRow);
-			}else{
-				if (pTemp->back()!=nRow){ 	//Èç¹ûÒÑ¾­¼ÇÂ¼µ±Ç°ĞĞ£¬ÄÇÃ´²»ÔÙ¼ÇÂ¼
-					pTemp->push_back(nRow);
-				}
-			}
-			pWriter++;
-		}
-		//½øÈëÏÂÒ»ĞĞ
-		nRow++;
-	}
-	return true;
+        if(setZh.find(temp)==setZh.end()){
+          m_pZh[countZh++]= *pWriter;
+          setZh.insert(make_pair(temp,false));
+        }
+      }
+      //å†™å…¥ç´¢å¼•,æ³¨æ„ï¼Œä¸€å¥è¯ä¸­å‡ºç°ä¸¤ä¸ªåŒåŒæ ·çš„å•è¯ï¼Œåªå†™å…¥ä¸€æ¬¡è¡Œæ•°
+      vector<long> *pTemp = m_pWordProject[*pWriter];
+      if (pTemp->size()==0){ //å¦‚æœç¬¬ä¸€æ¬¡æ’å…¥ï¼Œé‚£ä¹ˆç›´æ¥æ’å…¥
+        pTemp->push_back(nRow);
+      }else{
+        if (pTemp->back()!=nRow){ 	//å¦‚æœå·²ç»è®°å½•å½“å‰è¡Œï¼Œé‚£ä¹ˆä¸å†è®°å½•
+          pTemp->push_back(nRow);
+        }
+      }
+      pWriter++;
+    }
+    //è¿›å…¥ä¸‹ä¸€è¡Œ
+    nRow++;
+  }
+  return true;
 }
 
 long DataShared::a2long( const string &s ) const
 {
-	return atol(s.data());
+  return atol(s.data());
 }
 
 bool DataShared::SetMinSup( const long &sup )
 {
-	m_minSup = sup;
-	return true;
+  m_minSup = sup;
+  return true;
 }
 
 bool DataShared::SetLikelyHood( const double &x )
 {
-	m_like = x;
-	return true;
+  m_like = x;
+  return true;
 }

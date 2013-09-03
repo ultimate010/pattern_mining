@@ -14,7 +14,7 @@ BideThread::~BideThread(void)
 
 void BideThread::run()
 {
-  //´ÓdataÖĞÈ¡³öĞòÁĞÓÃÓÚÀ©Õ¹
+  //ä»dataä¸­å–å‡ºåºåˆ—ç”¨äºæ‰©å±•
   while(GetNext()){
     vector<long>  projectData(*(ptrData->m_pWordProject[m_seq[1]]));
     if (!BackScan(seq,projectData)){
@@ -22,23 +22,23 @@ void BideThread::run()
       Bide(projectData,m_seq,bei,0);
     }
   }
-  *(ptrData->m_pOutParameter) <<"Êä³öÁË:" << ptrData->m_outPutZh <<"¸öµ¥´Ê"<<endl;
+  *(ptrData->m_pOutParameter) <<"è¾“å‡ºäº†:" << ptrData->m_outPutZh <<"ä¸ªå•è¯"<<endl;
 }
 
 bool BideThread::GetNext()
 {
   lock.acquire();
   if(ptrData->m_iter == ptrData->m_freq1Item->end()){
-    //´¦ÀíÍêÁË
-    cout <<"Ïß³Ì£º "<<ThreadId <<"´¦ÀíÍê³É!"<<endl;
+    //å¤„ç†å®Œäº†
+    cout <<"çº¿ç¨‹ï¼š "<<ThreadId <<"å¤„ç†å®Œæˆ!"<<endl;
     lock.release();
     return false;
   }else{
-    //´æ´¢ĞòÁĞ£¬µÚ0ºÅÎ»ÖÃ´æ´¢±¾ĞòÁĞ³¤¶È,×î³¤ÎªseqLength
+    //å­˜å‚¨åºåˆ—ï¼Œç¬¬0å·ä½ç½®å­˜å‚¨æœ¬åºåˆ—é•¿åº¦,æœ€é•¿ä¸ºseqLength
     m_seq[1] = *(ptrData->m_iter);
     (ptrData->m_iter)++;
     m_seq[0] = 1;
-    cout <<"Ïß³Ì:" <<ThreadId <<": ³õÊ¼ĞòÁĞ:" <<ptrData->m_Index[m_seq[1]] <<endl;
+    cout <<"çº¿ç¨‹:" <<ThreadId <<": åˆå§‹åºåˆ—:" <<ptrData->m_Index[m_seq[1]] <<endl;
     lock.release();
     return true;
   }
@@ -86,7 +86,7 @@ bool BideThread::Bide(vector<long> & pProDatabase,const long * seq,
     long c12 = projectData.size();
     double lrr = likelyHood(currentSupport,c2,c12,ptrData->m_nCountRows);
     if(lrr<=ptrData->m_like){
-      //ĞÂµÄĞòÁĞ²»Âú×ãlr
+      //æ–°çš„åºåˆ—ä¸æ»¡è¶³lr
     }else {
       bool bbb = BackScan(newSeq,projectDatabase);
       double xxx = (float)projectDatabase.size()/(float)(ptrData->m_pWordProject[newSeq[1]])->size();
@@ -102,7 +102,7 @@ bool BideThread::Bide(vector<long> & pProDatabase,const long * seq,
 
 void  BideThread::LocallyFreQuentItems(const vector<long> & pData,const long * seq,map<long,long> & set)
 {
-  map<long,bool> set_sentence; //Ã¿¸ö¾ä×ÓÖĞ°üº¬µÄµ¥´ÊµÄ¼¯ºÏ
+  map<long,bool> set_sentence; //æ¯ä¸ªå¥å­ä¸­åŒ…å«çš„å•è¯çš„é›†åˆ
   for (vector<long>::const_iterator iter = pData.begin();
         iter != pData.end();iter++){
     unsigned int pos = firstInstanceOfSeq(ptrData->m_pDatabase[*iter],seq[0],seq);
@@ -121,7 +121,7 @@ void  BideThread::LocallyFreQuentItems(const vector<long> & pData,const long * s
     set_sentence.clear();
   }
 #if _MyDebug
-  cout <<"Î´´¦ÀíÇ°µÄÏîÄ¿¼¯:" <<endl;
+  cout <<"æœªå¤„ç†å‰çš„é¡¹ç›®é›†:" <<endl;
   for (map<long,long>::iterator i_set1 = set.begin();
         i_set1!=set.end();i_set1++){
     cout <<i_set1->first <<" ";
@@ -138,7 +138,7 @@ void  BideThread::LocallyFreQuentItems(const vector<long> & pData,const long * s
     }
   }
 #if _MyDebug
-  cout <<"Âú×ãÖ§³Ö¶ÈµÄÏîÄ¿¼¯ºÏÎª£º" <<endl;
+  cout <<"æ»¡è¶³æ”¯æŒåº¦çš„é¡¹ç›®é›†åˆä¸ºï¼š" <<endl;
   for (map<long,long>::iterator i_set12 = set.begin();
         i_set12!=set.end();i_set12++){
     cout <<i_set12->first <<" ";
@@ -188,11 +188,11 @@ bool BideThread::BackExtensionCheck( const long *seq,const vector<long> &pData )
   return false;
 }
 
-//seq.size();¾ÍÊÇĞòÁĞµÄ³¤¶È£¬pData.size()¾ÍÊÇĞòÁĞµÄÖ§³Ö¶È
-//ÀûÓÃscanskipÓÅ»¯¼¼Êõ£¬¼´ÊÇÈç¹ûÍ¶Ó°Êı¾İ¿âÖĞÓĞÒ»¾ä
-//Ã»ÓĞÂú×ãbacksacan£¬¾ÍÓÀÔ¶²»¿ÉÄÜÂú×ã,ÕâÒ»µã¿ÉÒÔ¸ù¾İÃ¿¾äÖĞµÄthe i-th semi-maximum
-// period of a prefix sequence À´¿´£¬Èç¹ûÒ»¾äÖĞ²»´æÔÚÕâ¸ö£¬¼´ÊÇÎª¿Õ£¬ÄÇÃ´²»ÓÃ²éÕÒÁË
-//Ö±½Ó·µ»Øfalse
+//seq.size();å°±æ˜¯åºåˆ—çš„é•¿åº¦ï¼ŒpData.size()å°±æ˜¯åºåˆ—çš„æ”¯æŒåº¦
+//åˆ©ç”¨scanskipä¼˜åŒ–æŠ€æœ¯ï¼Œå³æ˜¯å¦‚æœæŠ•å½±æ•°æ®åº“ä¸­æœ‰ä¸€å¥
+//æ²¡æœ‰æ»¡è¶³backsacanï¼Œå°±æ°¸è¿œä¸å¯èƒ½æ»¡è¶³,è¿™ä¸€ç‚¹å¯ä»¥æ ¹æ®æ¯å¥ä¸­çš„the i-th semi-maximum
+// period of a prefix sequence æ¥çœ‹ï¼Œå¦‚æœä¸€å¥ä¸­ä¸å­˜åœ¨è¿™ä¸ªï¼Œå³æ˜¯ä¸ºç©ºï¼Œé‚£ä¹ˆä¸ç”¨æŸ¥æ‰¾äº†
+//ç›´æ¥è¿”å›false
 bool BideThread::i_ThSemiMaxPeriods(const long * seq,const vector<long> &pData ,const unsigned int &ith) const
 {
   bool fisrtRun = true;
@@ -204,7 +204,7 @@ bool BideThread::i_ThSemiMaxPeriods(const long * seq,const vector<long> &pData ,
     if (ith == 1){
       firstInstance = 1;
     }else{
-      firstInstance = firstInstanceOfSeq(ptrData->m_pDatabase[*iter],ith-1,seq); //pDataÖĞµÄÎ»ÖÃ
+      firstInstance = firstInstanceOfSeq(ptrData->m_pDatabase[*iter],ith-1,seq); //pDataä¸­çš„ä½ç½®
     }
     int lastInFirst = firstInstanceOfSeq(ptrData->m_pDatabase[*iter],ith,seq);
     if(firstRun){
@@ -215,7 +215,7 @@ bool BideThread::i_ThSemiMaxPeriods(const long * seq,const vector<long> &pData ,
         }
         orgSeq[pSeq] = ptrData->m_pDatabase[*iter][pos];
       }
-      if(pSeq == 0) return false; //¿Õ¼¯
+      if(pSeq == 0) return false; //ç©ºé›†
       firstRun = false;
     }else{
       unsigned int pSeq = 0;
@@ -243,12 +243,12 @@ bool BideThread::i_ThSemiMaxPeriods(const long * seq,const vector<long> &pData ,
   }
   return true;
 }
-//seq[0]¾ÍÊÇĞòÁĞµÄ³¤¶È£¬pData.size()¾ÍÊÇĞòÁĞµÄÖ§³Ö¶È
-//ÀûÓÃscanskipÓÅ»¯¼¼Êõ£¬¼´ÊÇÈç¹ûÍ¶Ó°Êı¾İ¿âÖĞÓĞÒ»¾äÃ»
-//ÓĞÂú×ãback extensioncheck£¬¾ÍÓÀÔ¶²»¿ÉÄÜÂú×ã,ÕâÒ»µã
-//¿ÉÒÔ¸ù¾İÃ¿¾äÖĞµÄthe i-th maximum period of a prefix
-//sequence À´¿´£¬Èç¹ûÒ»¾äÖĞ²»´æÔÚÕâ¸ö£¬¼´ÊÇÎª¿Õ£¬ÄÇÃ´
-//²»ÓÃ²éÕÒÁË Ö±½Ó·µ»Øfalse
+//seq[0]å°±æ˜¯åºåˆ—çš„é•¿åº¦ï¼ŒpData.size()å°±æ˜¯åºåˆ—çš„æ”¯æŒåº¦
+//åˆ©ç”¨scanskipä¼˜åŒ–æŠ€æœ¯ï¼Œå³æ˜¯å¦‚æœæŠ•å½±æ•°æ®åº“ä¸­æœ‰ä¸€å¥æ²¡
+//æœ‰æ»¡è¶³back extensioncheckï¼Œå°±æ°¸è¿œä¸å¯èƒ½æ»¡è¶³,è¿™ä¸€ç‚¹
+//å¯ä»¥æ ¹æ®æ¯å¥ä¸­çš„the i-th maximum period of a prefix
+//sequence æ¥çœ‹ï¼Œå¦‚æœä¸€å¥ä¸­ä¸å­˜åœ¨è¿™ä¸ªï¼Œå³æ˜¯ä¸ºç©ºï¼Œé‚£ä¹ˆ
+//ä¸ç”¨æŸ¥æ‰¾äº† ç›´æ¥è¿”å›false
 bool BideThread::i_ThMaxPeriods(const long *seq,const vector<long> & pData ,const unsigned int &ith) const
 {
   bool firstRun = true;
@@ -256,8 +256,8 @@ bool BideThread::i_ThMaxPeriods(const long *seq,const vector<long> & pData ,cons
   unsigned long interSeq[seqLength]; memset(interSeq,-1,seqLength * sizeof(unsigned long));
   for (vector<long>::const_iterator iter = pData.begin();
         iter != pData.end();iter++){
-    //¶ÔÃ¿Ò»ĞòÁĞ¼ÆËã³ö´Ë¾äÖĞµÚÒ»´Î³öÏÖµÄÎ»ÖÃ
-    //*iter ±íÊ¾Í¶Ó°Êı¾İ¿âÖĞÏÔÊ¾µÄseqÔÚ×ÜÊı¾İ¿âÖĞËùÔÚµÄÎ»ÖÃ
+    //å¯¹æ¯ä¸€åºåˆ—è®¡ç®—å‡ºæ­¤å¥ä¸­ç¬¬ä¸€æ¬¡å‡ºç°çš„ä½ç½®
+    //*iter è¡¨ç¤ºæŠ•å½±æ•°æ®åº“ä¸­æ˜¾ç¤ºçš„seqåœ¨æ€»æ•°æ®åº“ä¸­æ‰€åœ¨çš„ä½ç½®
     unsigned int = firstInstance;
     if (ith == 1){
       firstInstance = 1;
@@ -273,7 +273,7 @@ bool BideThread::i_ThMaxPeriods(const long *seq,const vector<long> & pData ,cons
         }
         orgSeq[pSeq] = ptrData->m_pDatabase[*iter][pos];
       }
-      if(pSeq == 0) return false; //¿Õ¼¯
+      if(pSeq == 0) return false; //ç©ºé›†
       firstRun = false;
     }else{
       unsigned int pSeq = 0;
@@ -305,13 +305,13 @@ bool BideThread::i_ThMaxPeriods(const long *seq,const vector<long> & pData ,cons
 long BideThread::firstInstanceOfSeq(const long * array,const long &ith,const long * seq) const
 {
 #ifdef __DEBUG__
-  //Êı×éµÄµÚÒ»¸öÔªËØ±íÊ¾¸ÃÊı×éµÄ³¤¶È //²ÎÊı¼ì²â
+  //æ•°ç»„çš„ç¬¬ä¸€ä¸ªå…ƒç´ è¡¨ç¤ºè¯¥æ•°ç»„çš„é•¿åº¦ //å‚æ•°æ£€æµ‹
   if(ith < 1 || array == NULL || seq == NULL || seq[0] == 0){
-    cout <<"´«ÈëµÄ²ÎÊı´íÎó£¬Î»ÖÃÇófirst instance of a seq!" <<endl;
+    cout <<"ä¼ å…¥çš„å‚æ•°é”™è¯¯ï¼Œä½ç½®æ±‚first instance of a seq!" <<endl;
     return -1;
   }
   if(ith >= seq[0]){
-    cout <<"²ÎÊı´íÎó£¬i-th³¬³öĞòÁĞµÄ·¶Î§!" <<endl;
+    cout <<"å‚æ•°é”™è¯¯ï¼Œi-thè¶…å‡ºåºåˆ—çš„èŒƒå›´!" <<endl;
     return -1;
   }
 #endif
@@ -332,19 +332,19 @@ long BideThread::firstInstanceOfSeq(const long * array,const long &ith,const lon
 long BideThread::lastInstanceOfSq(const long * array,const long &ith,const long * seq) const
 {
 #ifdef __DEBUG__
-  //Êı×éµÄµÚÒ»¸öÔªËØ±íÊ¾¸ÃÊı×éµÄ³¤¶È //²ÎÊı¼ì²â
+  //æ•°ç»„çš„ç¬¬ä¸€ä¸ªå…ƒç´ è¡¨ç¤ºè¯¥æ•°ç»„çš„é•¿åº¦ //å‚æ•°æ£€æµ‹
   if(ith < 1 || array == NULL || seq == NULL || seq[0] == 0){
-    cout <<"´«ÈëµÄ²ÎÊı´íÎó£¬Î»ÖÃÇólast instance of a seq!" <<endl;
+    cout <<"ä¼ å…¥çš„å‚æ•°é”™è¯¯ï¼Œä½ç½®æ±‚last instance of a seq!" <<endl;
     return -1;
   }
   if (ith > seq[0]){
-    cout <<"²ÎÊı´íÎó£¬i-th³¬³öĞòÁĞµÄ·¶Î§!" <<endl;
+    cout <<"å‚æ•°é”™è¯¯ï¼Œi-thè¶…å‡ºåºåˆ—çš„èŒƒå›´!" <<endl;
     return -1;
   }
 #endif
   unsigned int last = seq[0];
   for (unsigned int i = array[0];i >= 1;i--)
-  {   //Î´¼ì²âarrayÖĞÊÇ·ñ°üº¬seq
+  {   //æœªæ£€æµ‹arrayä¸­æ˜¯å¦åŒ…å«seq
     if(array[i] == seq[last]){
       if(last == ith){
         return last;
@@ -353,7 +353,7 @@ long BideThread::lastInstanceOfSq(const long * array,const long &ith,const long 
       }
     }
   }
-  return -1; //Ã»ÕÒµ½
+  return -1; //æ²¡æ‰¾åˆ°
 }
 
 
