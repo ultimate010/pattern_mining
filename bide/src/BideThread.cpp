@@ -120,7 +120,7 @@ void  BideThread::LocallyFreQuentItems(const vector<long> & pData,const long * s
     }
     set_sentence.clear();
   }
-#if _MyDebug
+#ifdef _DEBUG
   cout <<"未处理前的项目集:" <<endl;
   for (map<long,long>::iterator i_set1 = set.begin();
         i_set1!=set.end();i_set1++){
@@ -137,7 +137,7 @@ void  BideThread::LocallyFreQuentItems(const vector<long> & pData,const long * s
       i_set++;
     }
   }
-#if _MyDebug
+#ifdef _DEBUG
   cout <<"满足支持度的项目集合为：" <<endl;
   for (map<long,long>::iterator i_set12 = set.begin();
         i_set12!=set.end();i_set12++){

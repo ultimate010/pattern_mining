@@ -15,12 +15,18 @@ void DataShared::loadConf(string path,map<string,string> & confMap){
 
 DataShared::DataShared(void)
 {
-  SetParameter();	LoadData();
+  loadConf("../run.conf",m_confMap);
+  SetParameter(m_confMap);
+  LoadData();
   m_pOut = new ofstream(outFile);
   m_pOut1 = new ofstream(outFile1);
   m_pOutParameter = new ofstream(outFileParameter);
   if (m_pOut==NULL||m_pOut1==NULL){
-    cout<<"生成文件错误" << endl; return; }
+#ifdef _ERROR
+    cout<<"打开输出文件错误" << endl;
+#endif
+    return;
+  }
   Freequent1Seq();
   *m_pOutParameter <<"lr: " <<m_like <<endl;
   *m_pOutParameter <<"最小支持度: " <<m_like <<endl;
@@ -58,100 +64,20 @@ DataShared::~DataShared(void)
   delete m_Index;
 }
 
-bool DataShared::SetParameter()
+bool DataShared::SetParameter(map<string,string> & mapConf)
 {
-  cout <<"请输入支持度：" <<endl;
-  long sup;
-  cin >>sup;
-  SetMinSup(sup);
-  double lr;
-  cout <<"请输入lr值: " <<endl; cin>> lr;
-  SetLikelyHood(lr);
+  string str = "minisup";
+  map<string,string>::iterator iter = mapConf.find(str);
+  str = iter->second;
+  SetMinSup(atof(str));
+  str = "lr";
+  iter = mapConf.find(str);
+  str = iter->second;
+  SetLikelyHood(atof(str));
   return true;
 }
 
-//////////////////////////////////////////////////////////////////////////
-// 把输入数据做映射，输出临时文件
-// 格式为：
-// row1：每个单词对应的映射数字
-// row2：上一行的总单词数目
-//////////////////////////////////////////////////////////////////////////
-bool DataShared::ChuliShuju(const int & min_sup){
-  long nCountItem = 0;	//计算单词数目
-  long nCountRow = 0; //计算行数
-  int nCountWordIn1Sentence = 0; //每行中的单词数目
-  m_nCountEn = 0;
-  m_nCountZh = 0;
-  ifstream f_in(rawFile);
-  ofstream f_out(tempFile);
-  if(f_in==NULL||f_out==NULL){
-    cout <<"文件未找到!" <<endl; return false;
-  }
-  multimap<string,long> * map_All_Word = new multimap<string,long>; //存储所有的单词
-  map<string,long>* m_map =new map<string,long>; string str_Input; //存储不同的单词
-  while(getline(f_in,str_Input)){ //读出每一行
-    if (str_Input.length()==0)	continue;//如果空行，跳过
-    nCountRow++; //总行数+1
-#if _MyDebug
-    cout <<"读取原始数据第" <<nCountRow <<"行!" <<endl;
-#endif
-    nCountWordIn1Sentence = 0; //每行中单词数目初始化为0
-    int nSpacePos = 0; //位置
-    nSpacePos = str_Input.find(" ");
-    while(nSpacePos>=0){
-      while (nSpacePos == 0 ){
-        str_Input = str_Input.erase(0,1);nSpacePos=str_Input.find(" ");//删掉句首的无用字符
-      }
-      string subString = str_Input.substr(0,nSpacePos); //取出所有的单词
-      str_Input.erase(0,nSpacePos+1);
-      if (subString==" "||subString=="")
-      {
-        nSpacePos = str_Input.find(' '); continue ; //空格跳过
-      }
-      char c = subString.data()[0];
-      if((c>='a'&&c<='z')||(c>='A'&&c<='Z')){
-        //处理的是英文
-        if(m_map->find(subString)==m_map->end())
-        m_nCountEn++;
-      }else{
-        //其他类型的都记为英文
-        if(m_map->find(subString)==m_map->end())
-        m_nCountZh++;
-      }
-      nCountWordIn1Sentence++; //处理一个单词，单词数+1
-      multimap<string,long>::iterator myIter = map_All_Word->find(subString);  //查找是否已经记录过这个单词
-      if (myIter != map_All_Word->end())
-      { //找到存在的
-        f_out <<myIter->second <<" "; //输出映射的数字数据
-        map_All_Word->insert(make_pair(subString,myIter->second));  //把当前单词映射再次插入map中
-#if _MYDEBUG
-        cout <<myIter->second <<" ";
-#endif
-      }else{ //没有记录这个单词，插入这个新的映射
-        f_out << nCountItem <<" ";
-#if _MYDEBUG
-        cout <<nCountItem <<"	";
-#endif
-        map_All_Word->insert(make_pair(subString,nCountItem));
-        m_map->insert(make_pair(subString,nCountItem)); nCountItem++;   	//总单词计数+1
-      }
-      nSpacePos = str_Input.find(' ');
-    }
-    f_out <<endl; f_out << nCountWordIn1Sentence << endl; //换行
-  }
-  /*
-     f_out <<nCountRow <<" " << map_All_Word.size() <<" " << min_sup <<" " <<m_map->size() <<endl; //输出第一行
-     */
-  //赋值
-  m_minSup = min_sup; m_nCountRows = nCountRow; m_nCountItem = map_All_Word->size();
-  m_nCountDifItem = m_map->size(); m_Index = new string[m_nCountDifItem];
-  for (map<string,long>::iterator iter = m_map->begin();
-        iter!=m_map->end();iter++)
-  m_Index[iter->second]=iter->first; //初始化
-  delete m_map;
-  delete map_All_Word;
-  return true;
-}
+
 
 //////////////////////////////////////////////////////////////////////////
 // 读取数据到内存中，并且初始话pDatabase指针指向数据库
@@ -165,25 +91,24 @@ bool DataShared::ChuliShuju(const int & min_sup){
 //////////////////////////////////////////////////////////////////////////
 bool DataShared::LoadData()
 {
-  if(ChuliShuju(m_minSup)==false){
-    //读取数据
+  string str = "inputfile";
+  map<string,string>::iterator iter = m_confMap.find(str);
+  str = iter->second;
+  ifstream in(str->c_str());
+  if (in == NULL){
+#ifdef _ERROR
+    cout <<"输入文件未找到!" <<endl;
+#endif
     return false;
   }
-  ifstream in(tempFile);
-  if (in==NULL)
-  {
-    cout <<"文件未找到!" <<endl;
-    return false;
-  }
-  string str_firstInput;
-  string str_secondInput;
+  string str_firstInput,str_secondInput;
   int pos;
   //初始化单词索引
-  m_pDatabase = new long *[m_nCountRows];
-  m_pWordCout = new long[m_nCountDifItem];
-  m_pWordProject = new vector<long> *[m_nCountDifItem];
-  m_pEn = new long[m_nCountEn];
-  m_pZh = new long[m_nCountZh];
+  m_pDatabase = new int64_t *[m_nCountRows];
+  m_pWordCout = new int64_t[m_nCountDifItem];
+  m_pWordProject = new vector<int64_t> *[m_nCountDifItem];
+  m_pEn = new int64_t[m_nCountEn];
+  m_pZh = new int64_t[m_nCountZh];
   map<string,bool> setEn,setZh;
   long countEn = 0;
   long countZh = 0;
@@ -240,19 +165,14 @@ bool DataShared::LoadData()
   return true;
 }
 
-long DataShared::a2long( const string &s ) const
+bool DataShared::SetMinSup( const double &sup )
 {
-  return atol(s.data());
-}
-
-bool DataShared::SetMinSup( const long &sup )
-{
-  m_minSup = sup;
+  this->m_minSup = sup;
   return true;
 }
 
 bool DataShared::SetLikelyHood( const double &x )
 {
-  m_like = x;
+  this->m_like = x;
   return true;
 }
