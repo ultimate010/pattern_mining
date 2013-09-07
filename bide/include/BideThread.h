@@ -1,3 +1,5 @@
+#ifndef _BIDE_H_
+#define _BIDE_H_
 #include <vector>
 #include <map>
 #include "DataShared.h"
@@ -24,11 +26,11 @@ public:
 	vector<long>  ProjectDatabase( const vector<long> &preojectDatabase,const long *seq ) const;
 	static double likelyHood(const double &c1,const  double & c2, const double &c12,const  double &N) ;
 	bool BackScan(const long * seq,const vector<long> &pData ) const ;
-	bool BackExtensionCheck( const long *seq,const vector<long> &pData ) const ;
+	bool BackExtensionCheck(const long *seq,const vector<long> &pData ) const ;
 	bool i_ThSemiMaxPeriods(const long * seq,const vector<long> &pData ,const int &ith) const ;
-	bool i_ThMaxPeriods( const long *seq,const  vector<long> & pData ,const long &ith ) const;
-	long fistInstanceOfSq( const long * array,const long &ith,const long *seq )const;
-	long lastInstanceOfSq( const long * array,const long &ith,const long * seq )const;
+	bool i_ThMaxPeriods(const long *seq,const  vector<long> & pData ,const long &ith ) const;
+	long fistInstanceOfSq(const long * array,const long &ith,const long *seq )const;
+	long lastInstanceOfSq(const long * array,const long &ith,const long * seq )const;
 	BideThread(int id,const CountedPtr<DataShared> & pdata);
 	~BideThread(void);
 	void run();
@@ -36,3 +38,4 @@ public:
 
 
 };
+#endif
