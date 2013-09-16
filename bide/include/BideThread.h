@@ -3,9 +3,6 @@
 #include <vector>
 #include <map>
 #include "DataShared.h"
-#include "zthread/Runnable.h"
-#include "zthread/Mutex.h"
-#include "zthread/CountedPtr.h"
 #include <math.h>
 #define  seqLength 100
 using namespace ZThread;
