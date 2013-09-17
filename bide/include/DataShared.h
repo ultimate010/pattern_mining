@@ -22,8 +22,10 @@ class DataShared
 
     /*public func*/
   public:
-    DataShared(void);
+    DataShared(string confPath);
     ~DataShared(void);
+    bool hasNext(); //是否还有为扩展的
+    int64_t getNextId(); //下一个扩展Id
     /*public data*/
   public:
     int64_t ** m_pDatabase;//指向数据库

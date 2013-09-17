@@ -1,7 +1,7 @@
 #include "DataShared.h"
 
-DataShared::DataShared(void){
-  loadConf("../run.conf",m_confMap);
+DataShared::DataShared(string confPath){
+  loadConf(confPath,m_confMap);
   SetParameter(m_confMap);
   LoadData();
   m_pOut = new ofstream(m_outFile.c_str());
@@ -13,9 +13,21 @@ DataShared::DataShared(void){
   }
   m_iter = m_freq1Item.begin();
 }
+bool DataShared::hasNext(){
+  if(m_iter == m_freq1Item.end()){
+    return false;
+  }
+  return true;
+}
+int64_t DataShared::getNextId(){
+  if(hasNext()){
+    return *m_iter++;
+  }
+  return -1;
+}
 
 void DataShared::loadConf(string path,map<string,string> & confMap){
-#ifdef _DEBUG
+#ifdef  _INFO
   cout <<"参数 :" <<endl;
 #endif
   ifstream file(path.c_str());
@@ -32,7 +44,7 @@ void DataShared::loadConf(string path,map<string,string> & confMap){
     }
     confMap.insert(pair<string,string>(str.substr(0,str.find('=')),str.substr(str.find('=')+1)));
   }
-#ifdef _DEBUG
+#ifdef _INFO
   map<string,string>::iterator iter;
   for(iter = confMap.begin();iter != confMap.end();iter++){
     cout <<iter->first <<"\t" << iter->second <<endl;
@@ -93,7 +105,8 @@ bool DataShared::LoadData()
     if(lineStr.size() == 0){
       continue;
     }
-    m_ZhSet.insert((atoi(lineStr.substr(lineStr.find('\t')+1,lineStr.size()).c_str())));
+    int64_t temp = atoi(lineStr.substr(lineStr.find(' ')+1,lineStr.size()).c_str());
+    m_ZhSet.insert(temp);
   }
   ifstream txtFile(m_inputFile.c_str());
   if(txtFile.fail()){
@@ -103,7 +116,7 @@ bool DataShared::LoadData()
     return false;
   }
   getline(txtFile,lineStr); //读取第一行信息
-  vector<string> vstr = getInfo(lineStr.c_str(),"\t");
+  vector<string> vstr = getInfo(lineStr.c_str()," ");
   m_nCountRows = atoi(vstr[0].c_str());//总行数
   m_nCountDifItem = atoi(vstr[1].c_str());//总不同单词数
   m_nCountItem = atoi(vstr[2].c_str());//总单词数
@@ -119,12 +132,12 @@ bool DataShared::LoadData()
     if(lineStr.size() == 0){
       continue;
     }
-    vector<string> vstr = getInfo(lineStr.c_str(),"\t");
+    vector<string> vstr = getInfo(lineStr.c_str()," ");
     m_pDatabase[lineCount] = new int64_t[vstr.size() + 1];
     m_pDatabase[lineCount][0] = vstr.size();
     for(int i = 0;i < vstr.size();i++){
 #ifdef _DEBUG
-      cout <<atoi(vstr[i]) <<"\t";
+      cout <<atoi(vstr[i].c_str()) <<"\t";
 #endif
       int64_t id = atoi(vstr[i].c_str());
       m_pDatabase[lineCount][i + 1] = id;
@@ -138,6 +151,21 @@ bool DataShared::LoadData()
       m_freq1Item.push_back(i);
     }
   }
+#ifdef _DEBUG
+  cout <<"Database:\n";
+  for(int i = 0;i < m_nCountRows;i++){
+    for(int j = 0;j < m_pDatabase[i][0];j++){
+      cout << m_pDatabase[i][j+1] <<"\t";
+    }
+    cout <<endl;
+  }
+  cout <<"Freq iterms:\n";
+  vector<int64_t>::iterator iter = m_freq1Item.begin();
+  while(iter != m_freq1Item.end()){
+    cout << *iter++ <<" ";
+  }
+  cout <<endl;
+#endif
   return true;
 }
 
