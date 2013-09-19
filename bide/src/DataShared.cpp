@@ -3,7 +3,7 @@
 DataShared::DataShared(string confPath){
   loadConf(confPath,m_confMap);
   SetParameter(m_confMap);
-  LoadData();
+  loadData();
   m_pOut = new ofstream(m_outFile.c_str());
   if (m_pOut==NULL){
 #ifdef _ERROR
@@ -55,7 +55,13 @@ void DataShared::loadConf(string path,map<string,string> & confMap){
 
 DataShared::~DataShared(void){
   //释放资源
+  for(int i = 0;i < m_nCountRows;i++){
+    delete [] m_pDatabase[i];
+  }
   delete [] m_pDatabase;
+  for(int i = 0;i < m_nCountDifItem;i++){
+    delete m_pWordProject[i];
+  }
   delete [] m_pWordProject;
   delete m_pOut;
 }
@@ -90,7 +96,7 @@ bool DataShared::SetParameter(map<string,string> & mapConf)
 // pDatabase中数据存储格式为：
 // 每行：本行的单词数 依次每个单词
 //////////////////////////////////////////////////////////////////////////
-bool DataShared::LoadData()
+bool DataShared::loadData()
 {
   ifstream zhFile(m_zhFile.c_str());
   if (zhFile.fail()){
@@ -108,6 +114,12 @@ bool DataShared::LoadData()
     int64_t temp = atoi(lineStr.substr(lineStr.find('\t')+1,lineStr.size()).c_str());
     m_ZhSet.insert(temp);
   }
+#ifdef _DEBUG
+  cout <<"Han zi:\n";
+  for(set<int64_t>::iterator iter = m_ZhSet.begin();iter != m_ZhSet.end();iter++){
+    cout << *iter <<"\t";
+  }
+#endif
   ifstream txtFile(m_inputFile.c_str());
   if(txtFile.fail()){
 #ifdef _ERROR
@@ -136,9 +148,6 @@ bool DataShared::LoadData()
     m_pDatabase[lineCount] = new int64_t[vstr.size() + 1];
     m_pDatabase[lineCount][0] = vstr.size();
     for(int i = 0;i < vstr.size();i++){
-#ifdef _DEBUG
-      cout <<atoi(vstr[i].c_str()) <<"\t";
-#endif
       int64_t id = atoi(vstr[i].c_str());
       m_pDatabase[lineCount][i + 1] = id;
       m_pWordProject[id]->insert(lineCount);
@@ -152,6 +161,7 @@ bool DataShared::LoadData()
     }
   }
 #ifdef _DEBUG
+  cout <<endl;
   cout <<"Database:\n";
   for(int i = 0;i < m_nCountRows;i++){
     for(int j = 0;j < m_pDatabase[i][0];j++){
@@ -169,13 +179,13 @@ bool DataShared::LoadData()
   return true;
 }
 
-bool DataShared::SetMinSup( const double &sup )
+bool DataShared::SetMinSup(const double &sup)
 {
   this->m_minSup = sup;
   return true;
 }
 
-bool DataShared::SetLikelyHood( const double &x )
+bool DataShared::SetLikelyHood(const double &x)
 {
   this->m_like = x;
   return true;

@@ -1,109 +1,92 @@
 #include "BideThread.h"
 
 
-BideThread::BideThread(int id,const CountedPtr<DataShared> & pdata)
+BideThread::BideThread(int id,string logPath)
 {
   ThreadId = id;
-  ptrData = pdata;
+  this->m_pOut = new ofstream(logPath.c_str());
+#ifdef _ERROR
+  if(this->m_pOut->fail()){
+    cerr <<"Can not open " <<logPath <<" for write\n";
+  }
+#endif
+  memset(this->m_seq,-1,G_SEQLEN); //清空
+  this->m_nCountSeq = 0;
 }
 
 
 BideThread::~BideThread(void)
 {
-}
-
-void BideThread::run()
-{
-  //从data中取出序列用于扩展
-  while(GetNext()){
-    vector<long>  projectData(*(ptrData->m_pWordProject[m_seq[1]]));
-    if (!BackScan(seq,projectData)){
-      bool bei = BackExtensionCheck(newSeq,projectDatabase);
-      Bide(projectData,m_seq,bei,0);
-    }
+  if(m_pOut != NULL){
+    delete m_pOut;
   }
-  *(ptrData->m_pOutParameter) <<"输出了:" << ptrData->m_outPutZh <<"个单词"<<endl;
+
+}
+/*
+ * 设置好m_seq后开始计算
+ */
+void BideThread::runFromItem()
+{
+  const set<int64_t>  projectData(*(this->m_pWordProject[m_seq[1]])); //所有投影出现
+  if(!BackScan(this->m_seq,projectData)){
+    bool bei = BackExtensionCheck(this->m_seq,projectData);
+    Bide(projectData,this->m_seq,bei,(double)-1.0f);
+  }
 }
 
 bool BideThread::GetNext()
 {
-  lock.acquire();
-  if(ptrData->m_iter == ptrData->m_freq1Item->end()){
-    //处理完了
-    cout <<"线程： "<<ThreadId <<"处理完成!"<<endl;
-    lock.release();
-    return false;
-  }else{
-    //存储序列，第0号位置存储本序列长度,最长为seqLength
-    m_seq[1] = *(ptrData->m_iter);
-    (ptrData->m_iter)++;
-    m_seq[0] = 1;
-    cout <<"线程:" <<ThreadId <<": 初始序列:" <<ptrData->m_Index[m_seq[1]] <<endl;
-    lock.release();
-    return true;
-  }
+  /*bug
+  */
 }
 
-bool forwardExtensionCheck(map<long,long & set,const unsigned int & support){
-  for (map<long,long>::const_iterator iter_set = set.begin();
+/*
+ * 判断是否可以向前生长
+ */
+bool forwardExtensionCheck(map<int64_t,int64_t> & set,const int64_t & support){
+  for(map<int64_t,int64_t>::const_iterator iter_set = set.begin();
         iter_set != set.end();iter_set++){
-    if (iter_set->second == currentSupport){
+    if(iter_set->second == currentSupport){
       return false;
     }
   }
   return true;
 }
-bool BideThread::Bide(vector<long> & pProDatabase,const long * seq,
+bool BideThread::Bide(const set<int64_t> & pProDatabase,const int64_t * seq,
       const bool & backExtensionCheck,const double & lr)
 {
-  long currentSupport  = pProDatabase.size();
-  map<long,long> set;
+  int64_t currentSupport  = pProDatabase.size();
+  map<int64_t,int64_t> set;
   LocallyFreQuentItems(pProDatabase,seq,set);
   bool forwardExtension = forwardExtensionCheck(set,currentSupport);
-  if(forwardExtension == true && backExtensionCheck == false && lr > ptrData->m_like){
-    lock.acquire();
-    ptrData->m_outPutZh += 1;
-    if (seq[0] > 1){
-      string tempFirst = ptrData->m_Index[seq[1]];
-      string tempEnd = ptrData->m_Index[seq[seq[0]]];
-      *(ptrData->m_pOut) << lr <<": ";
-      for(int i = 1;i<=seq[0];i++){
-        *(ptrData->m_pOut) <<ptrData->m_Index[seq[i]] <<" ";
-        *(ptrData->m_pOut1) <<ptrData->m_Index[seq[i]] <<" ";
-      }
-      *(ptrData->m_pOut) <<currentSupport ;
-      *(ptrData->m_pOut) <<endl;
-      *(ptrData->m_pOut1) <<endl;
-    }
-    lock.release();
+  if(forwardExtension == true && backExtensionCheck == false && lr > this->m_like){
+    this.m_nCountSeq++;
+    coutData(lr);
   }
-  for(map<long,long>::const_iterator iter_set = set.begin();
+  for(map<int64_t,int64_t>::const_iterator iter_set = set.begin();
         iter_set != set.end();iter_set++){
-    seq[0] = seq[0]+1; seq[seq[0]] = iter_set->first;
-    vector<long> projectData;
+    seq[0]++; seq[seq[0]] = iter_set->first;
+    vector<int64_t> projectData;
     ProjectDatabase(pProDatabase,seq,projectData);
-    long c2 = ptrData->m_pWordProject[seq[seq[0]]]->size();
-    long c12 = projectData.size();
-    double lrr = likelyHood(currentSupport,c2,c12,ptrData->m_nCountRows);
-    if(lrr<=ptrData->m_like){
-      //新的序列不满足lr
+    int64_t c2 = this->m_pWordProject[seq[seq[0]]]->size();
+    int64_t c12 = projectData.size();
+    double lrr = likelyHood(currentSupport,(double)c2,(double)c12,this->m_nCountRows);
+    if(lrr < this->m_like){
     }else {
-      bool bbb = BackScan(newSeq,projectDatabase);
-      double xxx = (float)projectDatabase.size()/(float)(ptrData->m_pWordProject[newSeq[1]])->size();
-      if (!bbb)
-      {
-        bool bei = BackExtensionCheck(newSeq,projectDatabase);
-        Bide(projectDatabase,newSeq,bei,lrr,c12);
+      if(!BackScan(seq,projectDatabase)){
+        bool bei = BackExtensionCheck(seq,projectDatabase);
+        Bide(projectDatabase,seq,bei,lrr,c12);
       }
     }
+    seq[seq[0]] = -1; seq[0]--; //回退
   }
   return true;
 }
 
-void  BideThread::LocallyFreQuentItems(const vector<long> & pData,const long * seq,map<long,long> & set)
+void  BideThread::LocallyFreQuentItems(const set<int64_t> & pData,const long * seq,map<long,long> & set)
 {
   map<long,bool> set_sentence; //每个句子中包含的单词的集合
-  for (vector<long>::const_iterator iter = pData.begin();
+  for(set<long>::const_iterator iter = pData.begin();
         iter != pData.end();iter++){
     unsigned int pos = firstInstanceOfSeq(ptrData->m_pDatabase[*iter],seq[0],seq);
     for (pos++;pos <= ptrData->m_pDatabase[*iter][0];pos++){
@@ -168,7 +151,7 @@ double BideThread::likelyHood( const double &c1,const double & c2, const double 
   }
 }
 
-bool BideThread::BackScan( const long * seq,const vector<long> &pData ) const
+bool BideThread::BackScan(const int64_t * seq,const set<int64_t> &pData)const
 {
   for(unsigned int i = 1;i <= seq[0];i++){
     if (i_ThSemiMaxPeriods(seq,pData,i) == true){
@@ -178,7 +161,7 @@ bool BideThread::BackScan( const long * seq,const vector<long> &pData ) const
   return false;
 }
 
-bool BideThread::BackExtensionCheck( const long *seq,const vector<long> &pData ) const
+bool BideThread::BackExtensionCheck(const int64_t * seq,const set<int64_t> &pData)const
 {
   for(unsigned int i = 1;i <= seq[0];i++){
     if(i_ThMaxPeriods(seq,pData,i) == true){
@@ -188,17 +171,17 @@ bool BideThread::BackExtensionCheck( const long *seq,const vector<long> &pData )
   return false;
 }
 
-//seq.size();就是序列的长度，pData.size()就是序列的支持度
+//seq[0]就是序列的长度，pData.size()就是序列的支持度
 //利用scanskip优化技术，即是如果投影数据库中有一句
 //没有满足backsacan，就永远不可能满足,这一点可以根据每句中的the i-th semi-maximum
 // period of a prefix sequence 来看，如果一句中不存在这个，即是为空，那么不用查找了
 //直接返回false
-bool BideThread::i_ThSemiMaxPeriods(const long * seq,const vector<long> &pData ,const unsigned int &ith) const
+bool BideThread::i_ThSemiMaxPeriods(const int64_t * seq,const set<int64_t> &pData ,const unsigned int &ith)const
 {
   bool fisrtRun = true;
-  unsigned long orgSeq[seqLength]; memset(orgSeq,-1,seqLength * sizeof(unsigned long));
-  unsigned long interSeq[seqLength]; memset(interSeq,-1,seqLength * sizeof(unsigned long));
-  for (vector<long>::const_iterator iter = pData.begin();
+  int64_t orgSeq[G_SEQLEN]; memset(orgSeq,-1,seqLength * sizeof(int64_t));
+  int64_t interSeq[G_SEQLEN]; memset(interSeq,-1,seqLength * sizeof(int64_t));
+  for (set<int64_t>::const_iterator iter = pData.begin();
         iter != pData.end();iter++){
     int firstInstance;
     if (ith == 1){
@@ -210,7 +193,7 @@ bool BideThread::i_ThSemiMaxPeriods(const long * seq,const vector<long> &pData ,
     if(firstRun){
       unsigned int pSeq = 0;
       for(unsigned int pos = firstInstance + 1;pos < lastInFirst; pos){
-        while(pSeq < seqLength && orgSeq[pSeq] != -1){
+        while(pSeq < G_SEQLEN && orgSeq[pSeq] != -1){
           pSeq++;
         }
         orgSeq[pSeq] = ptrData->m_pDatabase[*iter][pos];
@@ -220,25 +203,25 @@ bool BideThread::i_ThSemiMaxPeriods(const long * seq,const vector<long> &pData ,
     }else{
       unsigned int pSeq = 0;
       unsigned int pInterSeq = 0;
-      memset(interSeq,-1,seqLength * sizeof(unsigned long));
+      memset(interSeq,-1,G_SEQLEN * sizeof(unsigned long));
       for(unsigned int pos = firstInstance + 1;pos < lastInFirst; pos){
-        for(pSeq = 0;pSeq < seqLength;pSeq++){
+        for(pSeq = 0;pSeq < G_SEQLEN;pSeq++){
           if(orgSeq[pSeq] == ptrData->m_pDatabase[*iter][pos]){
             break;
           }
         }
-        if(pSeq == seqLength){
+        if(pSeq == G_SEQLEN){
           //not find
         }else{
           //find
-          while(pInterSeq < seqLength && instance[pInterSeq] != -1){
+          while(pInterSeq < G_SEQLEN && instance[pInterSeq] != -1){
             pInterSeq++;
           }
           interSeq[pInterSeq] = orgSeq[pSeq];
         }
       }
       if(pInterSeq == 0) return false;
-      memcpy(orgSeq,interSeq,seqLength * sizeof(unsigned long));
+      memcpy(orgSeq,interSeq,G_SEQLEN * sizeof(unsigned long));
     }
   }
   return true;
@@ -249,12 +232,12 @@ bool BideThread::i_ThSemiMaxPeriods(const long * seq,const vector<long> &pData ,
 //可以根据每句中的the i-th maximum period of a prefix
 //sequence 来看，如果一句中不存在这个，即是为空，那么
 //不用查找了 直接返回false
-bool BideThread::i_ThMaxPeriods(const long *seq,const vector<long> & pData ,const unsigned int &ith) const
+bool BideThread::i_ThMaxPeriods(const int64_t * seq,const set<int64_t> & pData,const unsigned int64_t &ith)const
 {
   bool firstRun = true;
-  unsigned long orgSeq[seqLength]; memset(orgSeq,-1,seqLength * sizeof(unsigned long));
-  unsigned long interSeq[seqLength]; memset(interSeq,-1,seqLength * sizeof(unsigned long));
-  for (vector<long>::const_iterator iter = pData.begin();
+  int64_t orgSeq[G_SEQLEN]; memset(orgSeq,-1,seqLength * sizeof(int64_t));
+  int64_t interSeq[G_SEQLEN]; memset(interSeq,-1,seqLength * sizeof(int64_t));
+  for(set<long>::const_iterator iter = pData.begin();
         iter != pData.end();iter++){
     //对每一序列计算出此句中第一次出现的位置
     //*iter 表示投影数据库中显示的seq在总数据库中所在的位置
@@ -268,7 +251,7 @@ bool BideThread::i_ThMaxPeriods(const long *seq,const vector<long> & pData ,cons
     if(firstRun){
       unsigned int pSeq = 0;
       for(unsigned int pos = firstInstance + 1;pos < lastInstanceOfSq; pos){
-        while(pSeq < seqLength && orgSeq[pSeq] != -1){
+        while(pSeq < G_SEQLEN && orgSeq[pSeq] != -1){
           pSeq++;
         }
         orgSeq[pSeq] = ptrData->m_pDatabase[*iter][pos];
@@ -278,25 +261,25 @@ bool BideThread::i_ThMaxPeriods(const long *seq,const vector<long> & pData ,cons
     }else{
       unsigned int pSeq = 0;
       unsigned int pInterSeq = 0;
-      memset(interSeq,-1,seqLength * sizeof(unsigned long));
+      memset(interSeq,-1,G_SEQLEN * sizeof(unsigned long));
       for(unsigned int pos = firstInstance + 1;pos < lastInstanceOfSq; pos){
-        for(pSeq = 0;pSeq < seqLength;pSeq++){
+        for(pSeq = 0;pSeq < G_SEQLEN;pSeq++){
           if(orgSeq[pSeq] == ptrData->m_pDatabase[*iter][pos]){
             break;
           }
         }
-        if(pSeq == seqLength){
+        if(pSeq == G_SEQLEN){
           //not find
         }else{
           //find
-          while(pInterSeq < seqLength && instance[pInterSeq] != -1){
+          while(pInterSeq < G_SEQLEN && instance[pInterSeq] != -1){
             pInterSeq++;
           }
           interSeq[pInterSeq] = orgSeq[pSeq];
         }
       }
       if(pInterSeq == 0) return false;
-      memcpy(orgSeq,interSeq,seqLength * sizeof(unsigned long));
+      memcpy(orgSeq,interSeq,G_SEQLEN * sizeof(unsigned long));
     }
   }
   return true;
@@ -356,4 +339,15 @@ long BideThread::lastInstanceOfSq(const long * array,const long &ith,const long 
   return -1; //没找到
 }
 
+/*
+ * 第0号位置存放长度
+ */
+void BideThread::coutData(const double & lr){
+  int64_t * tempP = m_seq;
+  *m_pOut << lr <<"\t";
+  while(*tempP != -1){
+    *m_pOut << *tempP << "\t";
+  }
+  *m_pOut << endl;
+}
 

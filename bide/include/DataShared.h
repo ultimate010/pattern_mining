@@ -1,25 +1,24 @@
 #ifndef _DATASHARED_H_
 #define _DATASHARED_H_
-#include <stdlib.h>
+#include "commonFunc.h"
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <map>
 #include <set>
 #include <vector>
-#include "commonFunc.h"
 
 using namespace std;
 class DataShared
 {
   /*protected func*/
   protected:
-    bool LoadData();
+    bool loadData();
     void loadConf(string path,map<string,string> & confMap);
     bool SetParameter(map<string,string> & mapConf);
     bool SetMinSup(const double &sup);
     bool SetLikelyHood(const double &x);
-
     /*public func*/
   public:
     DataShared(string confPath);
