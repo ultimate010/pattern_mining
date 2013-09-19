@@ -5,10 +5,8 @@
 #include "DataShared.h"
 #include <math.h>
 #define  seqLength 100
-using namespace ZThread;
 using namespace std;
 class BideThread :
-	public ZThread::Runnable
 {
 private:
 	CountedPtr<DataShared> ptrData;

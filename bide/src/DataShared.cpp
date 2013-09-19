@@ -105,7 +105,7 @@ bool DataShared::LoadData()
     if(lineStr.size() == 0){
       continue;
     }
-    int64_t temp = atoi(lineStr.substr(lineStr.find(' ')+1,lineStr.size()).c_str());
+    int64_t temp = atoi(lineStr.substr(lineStr.find('\t')+1,lineStr.size()).c_str());
     m_ZhSet.insert(temp);
   }
   ifstream txtFile(m_inputFile.c_str());
@@ -116,7 +116,7 @@ bool DataShared::LoadData()
     return false;
   }
   getline(txtFile,lineStr); //读取第一行信息
-  vector<string> vstr = getInfo(lineStr.c_str()," ");
+  vector<string> vstr = getInfo(lineStr.c_str(),"\t");
   m_nCountRows = atoi(vstr[0].c_str());//总行数
   m_nCountDifItem = atoi(vstr[1].c_str());//总不同单词数
   m_nCountItem = atoi(vstr[2].c_str());//总单词数
@@ -132,7 +132,7 @@ bool DataShared::LoadData()
     if(lineStr.size() == 0){
       continue;
     }
-    vector<string> vstr = getInfo(lineStr.c_str()," ");
+    vector<string> vstr = getInfo(lineStr.c_str(),"\t");
     m_pDatabase[lineCount] = new int64_t[vstr.size() + 1];
     m_pDatabase[lineCount][0] = vstr.size();
     for(int i = 0;i < vstr.size();i++){
