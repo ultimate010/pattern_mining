@@ -1,6 +1,5 @@
 #ifndef _BIDE_H_
 #define _BIDE_H_
-#include <cstdlib>
 #include <cmath>
 #include <vector>
 #include <map>
@@ -10,6 +9,8 @@
 #include <string>
 #include <cstring>
 #define  G_SEQLEN 100
+typedef long int int64_t;
+
 using namespace std;
 class BideThread
 {
@@ -19,23 +20,26 @@ class BideThread
     int64_t m_nCountRows;
     int64_t m_nCountDifItem;
     double m_like;
+    int64_t m_minSup;
   private:
     int64_t m_nCountSeq; //输出多少序列
     int ThreadId;//线程id
     int64_t m_seq[G_SEQLEN+1];
     ofstream * m_pOut;
   public:
-    bool Bide(const set<int64_t> & pProDatabase,const int64_t *seq,const bool & backExtensionCheck,const double &lr);
-    map<int64_t,int64_t> LocallyFreQuentItems(const set<int64_t> &pData,const int64_t * seq)const;
-
-    vector<long>  ProjectDatabase( const set<long> &preojectDatabase,const long *seq)const;
+    bool bide(const set<int64_t> & pProDatabase,int64_t *seq,const bool & backExtensionCheck,const double &lr);
+    void locallyFreQuentItems(const set<int64_t> & pData,const int64_t * seq,map<int64_t,int64_t> & set);
+    void cmpProjectDatabase(const set<int64_t> & preojectDatabase,const int64_t * seq,set<int64_t> & projectData);
     static double likelyHood(const double &c1,const double & c2, const double &c12,const  double &N);
-    bool BackScan(const int64_t * seq,const set<int64_t> &pData)const;
-    bool BackExtensionCheck(const int64_t * seq,const set<int64_t> &pData)const;
-    bool i_ThSemiMaxPeriods(const int64_t * seq,const set<int64_t> &pData,const int &ith)const;
-    bool i_ThMaxPeriods(const int64_t * seq,const  set<int64_t> & pData,const int &ith) const;
-    int64_t fistInstanceOfSq(const int64_t * array,const int64_t &ith,const int64_t *seq)const;
-    long lastInstanceOfSq(const int64_t * array,const int64_t &ith,const int64_t * seq)const;
+    bool backScan(const int64_t * seq,const set<int64_t> &pData)const;
+    bool backExtensionCheck(const int64_t * seq,const set<int64_t> &pData)const;
+    bool forwardExtensionCheck(map<int64_t,int64_t> & set,const int64_t & support);
+    bool i_thSemiMaxPeriods(const int64_t * seq,const set<int64_t> &pData,const unsigned int &ith)const;
+    bool i_thMaxPeriods(const int64_t * seq,const set<int64_t> & pData,const unsigned int &ith) const;
+    int64_t firstInstanceOfSeq(const int64_t * array,const unsigned int &ith,const int64_t * seq)const;
+    int64_t lastInFirstInstanceOfSeq(const int64_t * array,const unsigned int &ith,const int64_t * seq)const;
+    int64_t lastInLastInstanceOfSeq(const int64_t * array,const unsigned int &ith,const int64_t * seq)const;
+    int64_t lastInstanceOfSq(const int64_t * array,const unsigned int &ith,const int64_t * seq)const;
     void coutData(const double & lr);
     BideThread(int id,string logPath);
     ~BideThread(void);

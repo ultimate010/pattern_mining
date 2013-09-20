@@ -1,13 +1,14 @@
 #ifndef _DATASHARED_H_
 #define _DATASHARED_H_
 #include "commonFunc.h"
-#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <map>
 #include <set>
 #include <vector>
+#include <cstdlib>
+typedef long int int64_t;
 
 using namespace std;
 class DataShared
