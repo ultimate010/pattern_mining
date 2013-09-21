@@ -22,9 +22,9 @@ BideThread::~BideThread(void)
     delete m_pOut;
   }
   for(int64_t i = 0;i < m_nCountRows;i++){
-    delete[] m_pWordProject[i];
+    delete[] m_pDatabase[i];
   }
-  delete[] m_pWordProject;
+  delete[] m_pDatabase;
   for(int64_t i = 0;i < m_nCountDifItem;i++){
     delete m_pWordProject[i];
   }
@@ -97,7 +97,7 @@ void  BideThread::locallyFreQuentItems(const set<int64_t> & pData,const int64_t 
   set<int64_t> set_sentence; //每个句子中包含的单词的集合
   for(set<int64_t>::const_iterator iter = pData.begin();
         iter != pData.end();iter++){
-    unsigned int pos = firstInstanceOfSeq(this->m_pDatabase[*iter],seq[0],seq);
+    int64_t pos = firstInstanceOfSeq(this->m_pDatabase[*iter],seq[0],seq);
     for(pos++;pos <= this->m_pDatabase[*iter][0];pos++){
       set_sentence.insert((this->m_pDatabase[*iter][pos]));
     }
@@ -148,12 +148,12 @@ void BideThread::cmpProjectDatabase(const set<int64_t> & preojectDatabase,const 
   }
 }
 
-int64_t BideThread::lastInLastInstanceOfSeq(const int64_t * array,const unsigned int &ith,const int64_t * seq)const{
+int64_t BideThread::lastInLastInstanceOfSeq(const int64_t * array,const int64_t &ith,const int64_t * seq)const{
   if(ith == seq[0]){
     return lastInstanceOfSq(array,ith,seq);
   }else{
     int64_t end = lastInLastInstanceOfSeq(array,ith + 1,seq);
-    for(;end >= 1; end--){
+    for(--end;end >= 1; end--){
       if(array[end] == seq[ith]){
         return end;
       }
@@ -164,12 +164,12 @@ int64_t BideThread::lastInLastInstanceOfSeq(const int64_t * array,const unsigned
 #endif
   return -1;
 }
-int64_t BideThread::lastInFirstInstanceOfSeq(const int64_t * array,const unsigned int &ith,const int64_t * seq)const{
+int64_t BideThread::lastInFirstInstanceOfSeq(const int64_t * array,const int64_t &ith,const int64_t * seq)const{
   if(ith == seq[0]){
     return firstInstanceOfSeq(array,ith,seq);
   }else{
     int64_t end = lastInFirstInstanceOfSeq(array,ith + 1,seq);
-    for(;end >= 1; end--){
+    for(--end;end >= 1; end--){
       if(array[end] == seq[ith]){
         return end;
       }
@@ -191,7 +191,7 @@ double BideThread::likelyHood(const double &c1,const double & c2, const double &
 }
 
 bool BideThread::backScan(const int64_t * seq,const set<int64_t> &pData)const{
-  for(unsigned int i = 1;i <= seq[0];i++){
+  for(int64_t i = 1;i <= seq[0];i++){
     if (i_thSemiMaxPeriods(seq,pData,i) == true){
       return true;
     }
@@ -202,7 +202,7 @@ bool BideThread::backScan(const int64_t * seq,const set<int64_t> &pData)const{
  * 当有一个不满足就返回true
  */
 bool BideThread::backExtensionCheck(const int64_t * seq,const set<int64_t> &pData)const{
-  for(unsigned int i = 1;i <= seq[0];i++){
+  for(int64_t i = 1;i <= seq[0];i++){
     if(i_thMaxPeriods(seq,pData,i) == true){
       return true;
     }
@@ -215,30 +215,30 @@ bool BideThread::backExtensionCheck(const int64_t * seq,const set<int64_t> &pDat
 //没有满足backsacan，就永远不可能满足,这一点可以根据每句中的the i-th semi-maximum
 // period of a prefix sequence 来看，如果一句中不存在这个，即是为空，那么不用查找了
 //直接返回false
-bool BideThread::i_thSemiMaxPeriods(const int64_t * seq,const set<int64_t> &pData ,const unsigned int &ith)const{
+bool BideThread::i_thSemiMaxPeriods(const int64_t * seq,const set<int64_t> &pData ,const int64_t &ith)const{
   bool firstRun = true;
   int64_t orgSeq[G_SEQLEN]; memset(orgSeq,-1,G_SEQLEN * sizeof(int64_t));
   int64_t interSeq[G_SEQLEN]; memset(interSeq,-1,G_SEQLEN * sizeof(int64_t));
   for (set<int64_t>::const_iterator iter = pData.begin();
         iter != pData.end();iter++){
-    unsigned int begin;
+    int64_t begin;
     if (ith == 1){
       begin = 0;
     }else{
       begin = firstInstanceOfSeq(this->m_pDatabase[*iter],ith - 1,seq); //pData中的位置
     }
     int lastInFirst = lastInFirstInstanceOfSeq(this->m_pDatabase[*iter],ith,seq);
-    unsigned int pSeq = 0;
-    unsigned int pInterSeq = 0;
+    int64_t pSeq = 0;
+    int64_t pInterSeq = 0;
     if(firstRun){
-      for(unsigned int pos = begin + 1;pos < lastInFirst;pos++){
+      for(int64_t pos = begin + 1;pos < lastInFirst;pos++){
         orgSeq[pSeq++] = this->m_pDatabase[*iter][pos];
       }
       if(pSeq == 0) return false; //空集
       firstRun = false;
     }else{
       memset(interSeq,-1,G_SEQLEN * sizeof(int64_t));
-      for(unsigned int pos = begin + 1;pos < lastInFirst;pos++){
+      for(int64_t pos = begin + 1;pos < lastInFirst;pos++){
         for(pSeq = 0;pSeq < G_SEQLEN;pSeq++){
           if(orgSeq[pSeq] == this->m_pDatabase[*iter][pos]){
             break;
@@ -262,30 +262,30 @@ bool BideThread::i_thSemiMaxPeriods(const int64_t * seq,const set<int64_t> &pDat
 //可以根据每句中的the i-th maximum period of a prefix
 //sequence 来看，如果一句中不存在这个，即是为空，那么
 //不用查找了 直接返回false
-bool BideThread::i_thMaxPeriods(const int64_t * seq,const set<int64_t> & pData,const unsigned int &ith)const{
+bool BideThread::i_thMaxPeriods(const int64_t * seq,const set<int64_t> & pData,const int64_t &ith)const{
   bool firstRun = true;
   int64_t orgSeq[G_SEQLEN]; memset(orgSeq,-1,G_SEQLEN * sizeof(int64_t));
   int64_t interSeq[G_SEQLEN]; memset(interSeq,-1,G_SEQLEN * sizeof(int64_t));
   for(set<long>::const_iterator iter = pData.begin();
         iter != pData.end();iter++){
-    unsigned int begin;
+    int64_t begin;
     if (ith == 1){
       begin = 0;
     }else{
       begin = firstInstanceOfSeq(this->m_pDatabase[*iter],ith - 1,seq);
     }
-    unsigned int end = lastInLastInstanceOfSeq(this->m_pDatabase[*iter],ith,seq);
-    unsigned int pSeq = 0;
-    unsigned int pInterSeq = 0;
+    int64_t end = lastInLastInstanceOfSeq(this->m_pDatabase[*iter],ith,seq);
+    int64_t pSeq = 0;
+    int64_t pInterSeq = 0;
     if(firstRun){
-      for(unsigned int pos = begin + 1;pos < end;pos++){
+      for(int64_t pos = begin + 1;pos < end;pos++){
         orgSeq[pSeq++] = this->m_pDatabase[*iter][pos];
       }
       if(pSeq == 0) return false; //空集
       firstRun = false;
     }else{
       memset(interSeq,-1,G_SEQLEN * sizeof(int64_t));
-      for(unsigned int pos = begin + 1;pos < end; pos){
+      for(int64_t pos = begin + 1;pos < end;pos++){
         for(pSeq = 0;pSeq < G_SEQLEN;pSeq++){
           if(orgSeq[pSeq] == this->m_pDatabase[*iter][pos]){
             break;
@@ -303,7 +303,7 @@ bool BideThread::i_thMaxPeriods(const int64_t * seq,const set<int64_t> & pData,c
   return true;
 }
 
-int64_t BideThread::firstInstanceOfSeq(const int64_t * array,const unsigned int &ith,const int64_t * seq)const{
+int64_t BideThread::firstInstanceOfSeq(const int64_t * array,const int64_t &ith,const int64_t * seq)const{
 #ifdef _DEBUG
   //数组的第一个元素表示该数组的长度 //参数检测
   if(ith < 1 || array == NULL || seq == NULL || seq[0] == 0){
@@ -315,8 +315,8 @@ int64_t BideThread::firstInstanceOfSeq(const int64_t * array,const unsigned int 
     return -1;
   }
 #endif
-  unsigned int pos = 1;
-  for(unsigned int i = 1;i <= array[0];i++){
+  int64_t pos = 1;
+  for(int64_t i = 1;i <= array[0];i++){
     if(array[i] == seq[pos]){
       if(pos == ith){
         return i;
@@ -331,7 +331,7 @@ int64_t BideThread::firstInstanceOfSeq(const int64_t * array,const unsigned int 
   return -1;
 }
 
-int64_t BideThread::lastInstanceOfSq(const int64_t * array,const unsigned int &ith,const int64_t * seq) const{
+int64_t BideThread::lastInstanceOfSq(const int64_t * array,const int64_t &ith,const int64_t * seq) const{
 #ifdef _DEBUG
   //数组的第一个元素表示该数组的长度 //参数检测
   if(ith < 1 || array == NULL || seq == NULL || seq[0] == 0){
@@ -343,12 +343,11 @@ int64_t BideThread::lastInstanceOfSq(const int64_t * array,const unsigned int &i
     return -1;
   }
 #endif
-  unsigned int last = seq[0];
-  for (unsigned int i = array[0];i >= 1;i--)
-  {   //未检测array中是否包含seq
+  int64_t last = seq[0];
+  for (int64_t i = array[0];i >= 1;i--){   //未检测array中是否包含seq
     if(array[i] == seq[last]){
       if(last == ith){
-        return last;
+        return i;
       }else{
         last--;
       }

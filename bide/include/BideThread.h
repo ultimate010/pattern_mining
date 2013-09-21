@@ -34,12 +34,12 @@ class BideThread
     bool backScan(const int64_t * seq,const set<int64_t> &pData)const;
     bool backExtensionCheck(const int64_t * seq,const set<int64_t> &pData)const;
     bool forwardExtensionCheck(map<int64_t,int64_t> & set,const int64_t & support);
-    bool i_thSemiMaxPeriods(const int64_t * seq,const set<int64_t> &pData,const unsigned int &ith)const;
-    bool i_thMaxPeriods(const int64_t * seq,const set<int64_t> & pData,const unsigned int &ith) const;
-    int64_t firstInstanceOfSeq(const int64_t * array,const unsigned int &ith,const int64_t * seq)const;
-    int64_t lastInFirstInstanceOfSeq(const int64_t * array,const unsigned int &ith,const int64_t * seq)const;
-    int64_t lastInLastInstanceOfSeq(const int64_t * array,const unsigned int &ith,const int64_t * seq)const;
-    int64_t lastInstanceOfSq(const int64_t * array,const unsigned int &ith,const int64_t * seq)const;
+    bool i_thSemiMaxPeriods(const int64_t * seq,const set<int64_t> &pData,const int64_t &ith)const;
+    bool i_thMaxPeriods(const int64_t * seq,const set<int64_t> & pData,const int64_t &ith) const;
+    int64_t firstInstanceOfSeq(const int64_t * array,const int64_t &ith,const int64_t * seq)const;
+    int64_t lastInFirstInstanceOfSeq(const int64_t * array,const int64_t &ith,const int64_t * seq)const;
+    int64_t lastInLastInstanceOfSeq(const int64_t * array,const int64_t &ith,const int64_t * seq)const;
+    int64_t lastInstanceOfSq(const int64_t * array,const int64_t &ith,const int64_t * seq)const;
     void coutData(const double & lr);
     BideThread(int id,string logPath);
     ~BideThread(void);
