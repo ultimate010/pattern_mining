@@ -21,7 +21,14 @@ BideThread::~BideThread(void)
   if(m_pOut != NULL){
     delete m_pOut;
   }
-
+  for(int64_t i = 0;i < m_nCountRows;i++){
+    delete[] m_pWordProject[i];
+  }
+  delete[] m_pWordProject;
+  for(int64_t i = 0;i < m_nCountDifItem;i++){
+    delete m_pWordProject[i];
+  }
+  delete[] m_pWordProject;
 }
 /*
  * 设置好m_seq后开始计算
@@ -153,7 +160,7 @@ int64_t BideThread::lastInLastInstanceOfSeq(const int64_t * array,const unsigned
     }
   }
 #ifdef _DEBUG
-  cerr <<"Error 3#: int he lastInLirstInstanceOfSeq";
+  cerr <<"Error 3#: in the lastInLastInstanceOfSeq";
 #endif
   return -1;
 }
@@ -303,7 +310,7 @@ int64_t BideThread::firstInstanceOfSeq(const int64_t * array,const unsigned int 
     cout <<"传入的参数错误，位置求first instance of a seq!" <<endl;
     return -1;
   }
-  if(ith >= seq[0]){
+  if(ith > seq[0]){
     cout <<"参数错误，i-th超出序列的范围!" <<endl;
     return -1;
   }
@@ -354,10 +361,10 @@ int64_t BideThread::lastInstanceOfSq(const int64_t * array,const unsigned int &i
  * 第0号位置存放长度
  */
 void BideThread::coutData(const double & lr){
-  int64_t * tempP = m_seq;
+  int64_t * tempP = &(m_seq[1]);
   *m_pOut << lr <<"\t";
   while(*tempP != -1){
-    *m_pOut << *tempP << "\t";
+    *m_pOut << *tempP++ << "\t";
   }
   *m_pOut << endl;
 }

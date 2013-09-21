@@ -21,10 +21,10 @@ class BideThread
     int64_t m_nCountDifItem;
     double m_like;
     int64_t m_minSup;
+    int64_t m_seq[G_SEQLEN+1];
   private:
     int64_t m_nCountSeq; //输出多少序列
     int ThreadId;//线程id
-    int64_t m_seq[G_SEQLEN+1];
     ofstream * m_pOut;
   public:
     bool bide(const set<int64_t> & pProDatabase,int64_t *seq,const bool & backExtensionCheck,const double &lr);
