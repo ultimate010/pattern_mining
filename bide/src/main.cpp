@@ -22,6 +22,8 @@ int main(int argvs,char ** argv){
       cout << next;
     }
   }
+  delete pData;
+  return 0;
 }
 void iniBideThread(DataShared * data,BideThread * bide){
   bide->m_like = data->m_like;

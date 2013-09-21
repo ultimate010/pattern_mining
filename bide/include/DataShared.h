@@ -28,6 +28,7 @@ class DataShared
     int64_t getNextId(); //下一个扩展Id
     /*public data*/
   public:
+    int64_t m_taskCount; //任务总数
     int64_t ** m_pDatabase;//指向数据库
     set<int64_t> ** m_pWordProject; //item索引,记录每个item出现的序列位置
     int64_t m_nCountItem;//句子中出现总item个数

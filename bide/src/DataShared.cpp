@@ -12,6 +12,7 @@ DataShared::DataShared(string confPath){
     return;
   }
   m_iter = m_freq1Item.begin();
+  m_taskCount = m_freq1Item.size();
 }
 bool DataShared::hasNext(){
   if(m_iter == m_freq1Item.end()){
