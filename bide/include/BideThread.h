@@ -40,7 +40,7 @@ class BideThread
     int64_t lastInFirstInstanceOfSeq(const int64_t * array,const int64_t &ith,const int64_t * seq)const;
     int64_t lastInLastInstanceOfSeq(const int64_t * array,const int64_t &ith,const int64_t * seq)const;
     int64_t lastInstanceOfSq(const int64_t * array,const int64_t &ith,const int64_t * seq)const;
-    void coutData(const double & lr);
+    void coutData(const double & lr,const int64_t support);
     BideThread(int id,string logPath);
     ~BideThread(void);
     void runFromItem();

@@ -68,19 +68,26 @@ bool BideThread::bide(const set<int64_t> & parmProDatabase,int64_t * seq,
   map<int64_t,int64_t> myset;
   locallyFreQuentItems(parmProDatabase,seq,myset);
   bool forwardExtension = forwardExtensionCheck(myset,currentSupport);
-  if(forwardExtension == true && backCheck == false && lr > this->m_like){
+  if(forwardExtension == true && backCheck == false/* && lr > this->m_like */){
     this->m_nCountSeq++;
-    coutData(lr);
+    coutData(lr,currentSupport);
   }
   for(map<int64_t,int64_t>::const_iterator iter = myset.begin();
         iter != myset.end();iter++){
     seq[0]++; seq[seq[0]] = iter->first;
+#ifdef _DEBUG
+    cout <<"Current: ";
+    for(int i = 1;i <= seq[0];i++){
+      cout <<seq[i] <<"\t";
+    }
+    cout <<endl;
+#endif
     set<int64_t> projectData;
     cmpProjectDatabase(parmProDatabase,seq,projectData);
     int64_t c2 = this->m_pWordProject[seq[seq[0]]]->size();
     int64_t c12 = projectData.size();
     double lrr = likelyHood(currentSupport,(double)c2,(double)c12,this->m_nCountRows);
-    if(lrr < this->m_like){
+    if(/*lrr < this->m_like*/false){
     }else {
       if(!backScan(seq,projectData)){
         bool bei = backExtensionCheck(seq,projectData);
@@ -359,9 +366,9 @@ int64_t BideThread::lastInstanceOfSq(const int64_t * array,const int64_t &ith,co
 /*
  * 第0号位置存放长度
  */
-void BideThread::coutData(const double & lr){
+void BideThread::coutData(const double & lr,const int64_t support){
   int64_t * tempP = &(m_seq[1]);
-  *m_pOut << lr <<"\t";
+  *m_pOut << lr <<"\t" <<support <<"/"<<m_minSup <<"\t";
   while(*tempP != -1){
     *m_pOut << *tempP++ << "\t";
   }
