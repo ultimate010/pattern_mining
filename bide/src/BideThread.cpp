@@ -189,7 +189,7 @@ int64_t BideThread::lastInFirstInstanceOfSeq(const int64_t * array,const int64_t
 }
 
 double BideThread::likelyHood(const double &c1,const double & c2, const double &c12,const double &N){
-  double ret = ((long)c2 == (long)c12) ? 2*c12*log((c12*N)/(c1*c2)) : 2*(c12*log((c12*N)/(c1*c2)) + (c2-c12)*log(((c2-c12)*N)/((N-c1)*c2)));
+  double ret = ((int64_t)c2 == (int64_t)c12) ? 2*c12*log((c12*N)/(c1*c2)) : 2*(c12*log((c12*N)/(c1*c2)) + (c2-c12)*log(((c2-c12)*N)/((N-c1)*c2)));
   if (c12 < c1*c2/N){
     return -ret;
   }else{
@@ -258,7 +258,7 @@ bool BideThread::i_thSemiMaxPeriods(const int64_t * seq,const set<int64_t> &pDat
         }
       }
       if(pInterSeq == 0) return false;
-      memcpy(orgSeq,interSeq,G_SEQLEN * sizeof(unsigned long));
+      memcpy(orgSeq,interSeq,G_SEQLEN * sizeof(int64_t));
     }
   }
   return true;
@@ -273,7 +273,7 @@ bool BideThread::i_thMaxPeriods(const int64_t * seq,const set<int64_t> & pData,c
   bool firstRun = true;
   int64_t orgSeq[G_SEQLEN]; memset(orgSeq,-1,G_SEQLEN * sizeof(int64_t));
   int64_t interSeq[G_SEQLEN]; memset(interSeq,-1,G_SEQLEN * sizeof(int64_t));
-  for(set<long>::const_iterator iter = pData.begin();
+  for(set<int64_t>::const_iterator iter = pData.begin();
         iter != pData.end();iter++){
     int64_t begin;
     if (ith == 1){
