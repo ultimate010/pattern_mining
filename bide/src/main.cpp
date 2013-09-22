@@ -14,9 +14,11 @@ int main(int argvs,char ** argv){
   DataShared * pData = new DataShared("../run.conf");
   BideThread bide(0,"node0.log");
   iniBideThread(pData,&bide);
+  int64_t count = 0;
   while(pData->hasNext()){
     int64_t next = pData->getNextId();
     if(pData->m_ZhSet.find(next) != pData->m_ZhSet.end()){
+      cout <<"Task:" <<++count <<" of " <<pData->m_taskCount <<endl;
       setItem(next,&bide);
       bide.runFromItem();
     }
