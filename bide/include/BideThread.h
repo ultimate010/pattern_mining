@@ -8,7 +8,7 @@
 #include <iostream>
 #include <string>
 #include <cstring>
-#define  G_SEQLEN 100
+#define  G_SEQLEN 512
 typedef long int int64_t;
 
 using namespace std;
