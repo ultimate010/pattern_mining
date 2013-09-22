@@ -97,7 +97,9 @@ int slave(){
   sprintf(temp,"%d",rank);
   string path(temp);
   path = "log.node" + path;
+#ifdef _INFO
   ofstream out(path.c_str());
+#endif
   path = path + ".out";
   BideThread bide(rank,path);
   iniBideThread(&bide);

@@ -19,7 +19,6 @@ int main(int argvs,char ** argv){
     if(pData->m_ZhSet.find(next) != pData->m_ZhSet.end()){
       setItem(next,&bide);
       bide.runFromItem();
-      cout << next;
     }
   }
   delete pData;
