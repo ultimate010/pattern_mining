@@ -16,9 +16,9 @@ int main(int argvs,char ** argv){
   iniBideThread(pData,&bide);
   while(pData->hasNext()){
     int64_t next = pData->getNextId();
-    setItem(next,&bide);
-    bide.runFromItem();
     if(pData->m_ZhSet.find(next) != pData->m_ZhSet.end()){
+      setItem(next,&bide);
+      bide.runFromItem();
       cout << next;
     }
   }
