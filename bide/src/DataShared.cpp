@@ -4,16 +4,18 @@ DataShared::DataShared(string confPath){
   loadConf(confPath,m_confMap);
   SetParameter(m_confMap);
   loadData();
-  m_pOut = new ofstream(m_outFile.c_str());
-  if (m_pOut==NULL){
+  /*
+     m_pOut = new ofstream(m_outFile.c_str());
+     if (m_pOut==NULL){
 #ifdef _ERROR
-    cerr <<"Can not open" <<m_outFile <<endl;
+cerr <<"Can not open" <<m_outFile <<endl;
 #endif
-    return;
-  }
+return;
+}
+*/
   m_iter = m_freq1Item.begin();
   m_taskCount = m_freq1Item.size();
-}
+  }
 bool DataShared::hasNext(){
   if(m_iter == m_freq1Item.end()){
     return false;
@@ -64,7 +66,7 @@ DataShared::~DataShared(void){
     delete m_pWordProject[i];
   }
   delete [] m_pWordProject;
-  delete m_pOut;
+  // delete m_pOut;
 }
 
 bool DataShared::SetParameter(map<string,string> & mapConf)
