@@ -160,7 +160,7 @@ bool DataShared::loadData()
   //Compute Freequent1Seq
   for(int64_t i = 0;i < m_nCountDifItem;i++){
     if(m_pWordProject[i]->size() >= min){
-      if(m_zhFile.end() != m_zhFile.find(i)){
+      if(m_ZhSet.end() != m_ZhSet.find(i)){
         m_freq1Item.push_back(i);
       }
     }
