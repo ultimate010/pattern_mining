@@ -4,6 +4,9 @@
 
 BideThread::BideThread(int id,string logPath)
 {
+#ifdef _THREAD
+  pthread_mutex_init(&m_mutex, NULL);
+#endif
   ThreadId = id;
   this->m_pOut = new ofstream(logPath.c_str());
 #ifdef _ERROR
@@ -18,6 +21,9 @@ BideThread::BideThread(int id,string logPath)
 
 BideThread::~BideThread(void)
 {
+#ifdef _THREAD
+  pthread_mutex_destroy(&m_mutex);
+#endif
   if(m_pOut != NULL){
     delete m_pOut;
   }
@@ -30,6 +36,15 @@ BideThread::~BideThread(void)
   }
   delete[] m_pWordProject;
 }
+#ifdef _THREAD
+void BideThread::run(int64_t * seq){
+  const set<int64_t>  projectData(*(this->m_pWordProject[seq[1]])); //所有投影出现
+  if(!backScan(this->m_seq,projectData)){
+    bool bei = backExtensionCheck(seq,projectData);
+    bide(projectData,seq,bei,(double)-1.0f);
+  }
+}
+#endif
 /*
  * 设置好m_seq后开始计算
  */
@@ -42,11 +57,6 @@ void BideThread::runFromItem()
   }
 }
 
-bool BideThread::GetNext()
-{
-  /*bug
-  */
-}
 
 /*
  * 判断是否可以向前生长
@@ -70,7 +80,7 @@ bool BideThread::bide(const set<int64_t> & parmProDatabase,int64_t * seq,
   bool forwardExtension = forwardExtensionCheck(myset,currentSupport);
   if(forwardExtension == true && backCheck == false/* && lr > this->m_like */){
     this->m_nCountSeq++;
-    coutData(lr,currentSupport);
+    coutData(seq,lr,currentSupport);
   }
   for(map<int64_t,int64_t>::const_iterator iter = myset.begin();
         iter != myset.end();iter++){
@@ -366,12 +376,14 @@ int64_t BideThread::lastInstanceOfSq(const int64_t * array,const int64_t &ith,co
 /*
  * 第0号位置存放长度
  */
-void BideThread::coutData(const double & lr,const int64_t support){
-  int64_t * tempP = &(m_seq[1]);
+void BideThread::coutData(const int64_t * seq,const double & lr,const int64_t support){
+  pthread_mutex_lock(&m_mutex);
+  const int64_t * tempP = ++seq;
   *m_pOut << lr <<"\t" <<support <<"/"<<m_minSup <<"\t";
   while(*tempP != -1){
     *m_pOut << *tempP++ << "\t";
   }
   *m_pOut << endl;
+  pthread_mutex_unlock(&m_mutex);
 }
 

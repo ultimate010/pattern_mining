@@ -8,12 +8,16 @@
 #include <iostream>
 #include <string>
 #include <cstring>
+#include <pthread.h>
 #define  G_SEQLEN 512
 typedef long int int64_t;
 
 using namespace std;
 class BideThread
 {
+#ifdef _THREAD
+  pthread_mutex_t m_mutex;
+#endif
   public:
     int64_t ** m_pDatabase;//指向数据库
     set<int64_t> ** m_pWordProject; //item索引,记录每个item出现的序列位置
@@ -21,7 +25,7 @@ class BideThread
     int64_t m_nCountDifItem;
     double m_like;
     int64_t m_minSup;
-    int64_t m_seq[G_SEQLEN+1];
+    int64_t m_seq[G_SEQLEN+1]; //多线程版本废弃
   private:
     int64_t m_nCountSeq; //输出多少序列
     int ThreadId;//线程id
@@ -40,10 +44,12 @@ class BideThread
     int64_t lastInFirstInstanceOfSeq(const int64_t * array,const int64_t &ith,const int64_t * seq)const;
     int64_t lastInLastInstanceOfSeq(const int64_t * array,const int64_t &ith,const int64_t * seq)const;
     int64_t lastInstanceOfSq(const int64_t * array,const int64_t &ith,const int64_t * seq)const;
-    void coutData(const double & lr,const int64_t support);
+    void coutData(const int64_t * seq,const double & lr,const int64_t support);
     BideThread(int id,string logPath);
     ~BideThread(void);
     void runFromItem();
-    bool GetNext();
+#ifdef _THREAD
+    void run(int64_t * seq);
+#endif
 };
 #endif
