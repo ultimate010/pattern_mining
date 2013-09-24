@@ -14,7 +14,7 @@ BideThread::BideThread(int id,string logPath)
     cerr <<"Can not open " <<logPath <<" for write\n";
   }
 #endif
-  memset(this->m_seq,-1,G_SEQLEN); //清空
+  memset(this->m_seq,-1,G_SEQLEN * sizeof(int64_t)); //清空
   this->m_nCountSeq = 0;
 }
 
@@ -39,7 +39,7 @@ BideThread::~BideThread(void)
 #ifdef _THREAD
 void BideThread::run(int64_t * seq){
   const set<int64_t>  projectData(*(this->m_pWordProject[seq[1]])); //所有投影出现
-  if(!backScan(this->m_seq,projectData)){
+  if(!backScan(seq,projectData)){
     bool bei = backExtensionCheck(seq,projectData);
     bide(projectData,seq,bei,(double)-1.0f);
   }
@@ -377,13 +377,17 @@ int64_t BideThread::lastInstanceOfSq(const int64_t * array,const int64_t &ith,co
  * 第0号位置存放长度
  */
 void BideThread::coutData(const int64_t * seq,const double & lr,const int64_t support){
+#ifdef _THREAD
   pthread_mutex_lock(&m_mutex);
-  const int64_t * tempP = ++seq;
+#endif
+  const int64_t * tempP = &(seq[1]);
   *m_pOut << lr <<"\t" <<support <<"/"<<m_minSup <<"\t";
   while(*tempP != -1){
     *m_pOut << *tempP++ << "\t";
   }
   *m_pOut << endl;
+#ifdef _THREAD
   pthread_mutex_unlock(&m_mutex);
+#endif
 }
 
