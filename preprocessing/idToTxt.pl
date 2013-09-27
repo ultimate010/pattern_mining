@@ -4,9 +4,13 @@
 #2013-9-122
 use Encode;
 use utf8;
+if(@ARGV != 4){
+  die "Usage: inputfile word2IdFile outfile skipWordCount\n";
+}
 open(txtFile,"$ARGV[0]");
-open(in,"word2Id.txt");
-open(outFile,">text.zh.txt");
+open(in,"$ARGV[1]");
+open(outFile,">$ARGV[2]");
+$skip = $ARGV[3];
 
 while($line = <in>){
   chomp($line);
@@ -24,7 +28,13 @@ while($line = <txtFile>){
   $first = 1;
   $str = "";
   @arr = split(/[ \t]/,$line);
+  $count = 0;
   for($i = 0;$i < @arr;$i++){
+    if(++$count <= $skip){
+      next;
+    }else{
+      $count = 0;
+    }
     if($first == 1){
       $first = 0;
     }else{
