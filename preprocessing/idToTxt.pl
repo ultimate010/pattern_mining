@@ -28,13 +28,7 @@ while($line = <txtFile>){
   $first = 1;
   $str = "";
   @arr = split(/[ \t]/,$line);
-  $count = 0;
-  for($i = 0;$i < @arr;$i++){
-    if(++$count <= $skip){
-      next;
-    }else{
-      $count = 0;
-    }
+  for($i = $skip;$i < @arr;$i++){
     if($first == 1){
       $first = 0;
     }else{
