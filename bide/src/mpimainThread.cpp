@@ -119,7 +119,7 @@ int slave(){
 }
 
 void bcast2BideThread(DataShared * data){
-  int64_t minsup = data->m_minSup * data->m_nCountRows;
+  int64_t minsup = (int64_t)(data->m_minSup * data->m_nCountRows);
   MPI_Bcast(&(data->m_like),sizeof(int64_t),MPI_CHAR,0,MPI_COMM_WORLD);
   MPI_Bcast(&(minsup),sizeof(int64_t),MPI_CHAR,0,MPI_COMM_WORLD);
   MPI_Bcast(&(data->m_nCountRows),sizeof(int64_t),MPI_CHAR,0,MPI_COMM_WORLD);

@@ -28,7 +28,7 @@ int main(int argvs,char ** argv){
 }
 void iniBideThread(DataShared * data,BideThread * bide){
   bide->m_like = data->m_like;
-  bide->m_minSup = data->m_minSup * data->m_nCountRows;
+  bide->m_minSup = (int64_t)(data->m_minSup * data->m_nCountRows);
   bide->m_nCountRows = data->m_nCountRows;
   bide->m_nCountDifItem = data->m_nCountDifItem;
   bide->m_pWordProject = new set<int64_t> * [bide->m_nCountDifItem];
