@@ -4,6 +4,10 @@
 #2013-9-8
 use Encode;
 use utf8;
+if(@ARGV != 1){
+  print "Will produce word2Id.txt zhWord2Id.txt wordCount.txt\n";
+  die "Usage: inputfile\n";
+}
 open(in,"$ARGV[0]");
 open(outDict,">word2Id.txt");
 open(outZhDict,">zhWord2Id.txt");
