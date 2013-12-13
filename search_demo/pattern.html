@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<title>中英双语语料翻译模式查询Demo</title>
+
+<link rel="stylesheet" href="./lib/bootstrap.min.css">
+<link rel="stylesheet" href="./lib/bootstrap-theme.min.css">
+
+<!--[if lt IE 9]>
+<script src="./lib/html5shiv.js"></script>
+<script src="./lib/respond.min.js"></script>
+<![endif]-->
+
+<style>
+.bs-docs-home
+{
+  background-color: #1B31B1;
+  background-image: url(line.png);
+}
+</style>
+<!--查找语料 -->
+<script type="text/javascript">
+function text(e) {
+  var t = "";
+  //如果传递的是元素，则取其子元素，
+  //否则假定它是一个数组
+  e = e.childNodes || e;
+  //检查所有子节点
+  for ( var j = 0; j < e.length; j++ ) {
+    //如果它不是一个元素，追加其文本到返回值
+    //否则，对其所有子元素递归处理
+    t += e[j].nodeType != 1 ?
+      e[j].nodeValue : text(e[j].childNodes);
+  }
+  //返回所得的文本
+  return t;
+}
+function search(str)
+{
+//  alert(str+"end");
+  var xmlhttp;
+  if (window.XMLHttpRequest){
+    // code for IE7+, Firefox, Chrome, Opera, Safari
+    xmlhttp=new XMLHttpRequest();
+  }else{
+    // code for IE6, IE5
+    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  }
+  xmlhttp.onreadystatechange=function()
+  {
+    if (xmlhttp.readyState==4 && xmlhttp.status==200){
+      document.getElementById("resultCorpus").innerHTML=xmlhttp.responseText;
+    }
+  }
+  xmlhttp.open("GET","./queryCorpus.php?time=" + Math.random() + "&item=" + str,true);
+  xmlhttp.send();
+}
+</script>
+<!--查找模式 -->
+
+<script type="text/javascript">
+function searchPattern(event)
+{
+  var xmlhttp;
+  if (window.XMLHttpRequest){
+    // code for IE7+, Firefox, Chrome, Opera, Safari
+    xmlhttp=new XMLHttpRequest();
+  }else{
+    // code for IE6, IE5
+    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  }
+  xmlhttp.onreadystatechange=function()
+  {
+    if (xmlhttp.readyState==4 && xmlhttp.status==200){
+      document.getElementById("resultPattern").innerHTML=xmlhttp.responseText;
+//      alert(xmlhttp.responseText);
+    }
+  }
+//  alert(document.getElementById("searchString").value);
+  xmlhttp.open("GET","./queryPattern.php?time=" + Math.random() + "&item=" + document.getElementById("searchString").value,true);
+  xmlhttp.send();
+}
+</script>
+
+</head>
+
+
+<body class="bs-docs-home">
+<div class="container theme-showcase">
+  <h1 style=" line-height:2em;"> </h1><br />
+
+  <div class="row">
+    <div class="col-sm-0"></div>
+
+    <div class="col-sm-12">
+      <div class="panel panel-primary">
+	<div class="panel-heading">
+	  <h3 class="panel-title"><strong>中英双语语料翻译模式查询Demo</strong></h3>
+	</div>
+	<div class="panel-body">
+	  <div class="alert alert-danger alert-dismissable">
+	    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+	    <strong>提示:</strong> 查询支持正则表达式,点击查询结果,可以获得例句
+	  </div>
+	  <form role="form" name="form" method="POST">
+	    <div class="form-group">
+	      <label for="IDCard">请输入模式</label>
+	      <div class="input-group">
+		<input type="text" class="form-control"	onkeydown="if(event.keyCode==13){searchPattern();return false;}" id="searchString"  placeholder="模式" >
+		<span class="input-group-btn">
+		  <button class="btn btn-primary" type="button" onClick="searchPattern();" >查询</button>
+		</span>
+	      </div>
+	    </div>
+	  </form>
+<div class="row">
+	    <div class="col-sm-4"  id = "resultPattern"></div>
+	    <div class="col-sm-8"  id = "resultCorpus"></div>
+</div>
+	</div>
+      </div>
+    </div>
+    <div class="col-sm-0"></div>
+  </div>
+</div>
+<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="http://cdn.bootcss.com/twitter-bootstrap/3.0.1/js/bootstrap.min.js"></script>
+</body>
+</html>
