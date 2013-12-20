@@ -97,7 +97,7 @@ bool BideThread::bide(const set<int64_t> & parmProDatabase,int64_t * seq,
     int64_t c2 = this->m_pWordProject[seq[seq[0]]]->size();
     int64_t c12 = projectData.size();
     double lrr = likelyHood(currentSupport,(double)c2,(double)c12,this->m_nCountRows);
-    if(/*lrr < this->m_like*/false){
+    if(lrr < this->m_like/*false*/){
     }else {
       if(!backScan(seq,projectData)){
         bool bei = backExtensionCheck(seq,projectData);

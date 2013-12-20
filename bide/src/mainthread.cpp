@@ -14,7 +14,7 @@ void * run(void * arg);
 
 DataShared * pData = NULL;
 BideThread * pBide = NULL;
-int64_t count = 0;
+int64_t g_count = 0;
 int main(int argvs,char ** argv){
   //DataShared * pData = new DataShared(argv[0]);
   pData = new DataShared("../run.conf");
@@ -38,7 +38,7 @@ void * run(void *){
   while(true){
     pthread_mutex_lock(&g_mutex);
     if(pData->hasNext()){
-      cout <<"Task:" <<++count <<" of " <<pData->m_taskCount <<endl;
+      cout <<"Task:" <<++g_count <<" of " <<pData->m_taskCount <<endl;
       int64_t item = pData->getNextId();
       pthread_mutex_unlock(&g_mutex);
       memset(seq,-1,G_SEQLEN * sizeof(int64_t));
